@@ -92,6 +92,27 @@ a{color:var(--sky)}
 @media (max-width:560px){.hero-logo{flex-basis:auto;width:min(230px,70%);margin:0 auto}}
 [hidden]{display:none!important}
 .linkstrip{margin-top:4px}
+.hintbtn{margin-bottom:6px}
+.gone-opt{opacity:.25!important;filter:grayscale(1);pointer-events:none;transform:scale(.96)}
+.glowhint{animation:glowhint 1.3s ease-in-out 2}
+@keyframes glowhint{0%,100%{box-shadow:inset 0 0 0 3px var(--sun),0 6px 0 var(--sun-depth)}50%{box-shadow:inset 0 0 0 5px var(--sun),0 0 0 8px var(--sun-soft),0 6px 0 var(--sun-depth);transform:translateY(-3px)}}
+.zone{display:flex;align-items:center;gap:16px;width:100%;margin-top:22px;padding:16px 18px;border:0;border-radius:var(--r);cursor:pointer;text-align:left;color:var(--ink);
+  background:radial-gradient(400px 160px at 0% 0%,var(--sun-soft),transparent 70%),linear-gradient(135deg,var(--surface),var(--t5));box-shadow:inset 0 0 0 3px var(--sun),0 6px 0 var(--sun-depth),0 20px 30px -18px var(--drop);transition:transform .15s}
+.zone:hover{transform:translateY(-4px)}
+.zone strong{font-family:var(--f-display);font-size:1.45rem;line-height:1.1}
+.zone .pod{flex:none}
+.zone-best{display:flex;align-items:center;gap:6px;flex:none;font-family:var(--f-display)}
+.zone-best b{display:block;font-size:1.6rem;line-height:1}
+.zone-best small{display:block;font-size:.75rem;color:var(--muted)}
+.hud{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:10px 16px;border-radius:18px;font-family:var(--f-display);font-size:1.3rem}
+.hud .ico{width:30px;height:30px}
+.meter.timer i{transition:width 1s linear}
+.meter.timer i.low{background:linear-gradient(180deg,#ff9b85,var(--coral))}
+.big-inp{font-family:var(--f-display);font-size:1.6rem;font-weight:800;min-height:58px;text-align:center;letter-spacing:.04em}
+.big-inp.right{border-color:var(--leaf);background:var(--leaf-soft)}
+.big-inp.wrong{border-color:var(--coral);background:var(--coral-soft);animation:shake .35s}
+.bigscore{font-family:var(--f-display);font-weight:800;font-size:3.4rem;line-height:1;color:var(--leaf);text-shadow:0 3px 0 var(--leaf-depth),0 10px 14px var(--drop)}
+.bigscore small{font-size:1.2rem;color:var(--muted);text-shadow:none}
 .step{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-radius:18px;background:var(--surface-2);box-shadow:inset 0 3px 8px -5px var(--drop)}
 .stepn{flex:none;width:34px;height:34px;border-radius:12px;display:grid;place-items:center;font-family:var(--f-display);font-weight:800;color:var(--on-leaf);background:linear-gradient(180deg,var(--leaf-hi),var(--leaf));box-shadow:0 3px 0 var(--leaf-depth)}
 .linkstrip .inp{min-height:40px;font-size:.9rem;font-weight:700;color:var(--sky)}
@@ -369,11 +390,12 @@ var GAMES = [
   {k:'spell', ic:'abc', en:'Spell It', vi:'Đánh vần', den:'Put the letters in order.', dvi:'Xếp các chữ cái theo đúng thứ tự.'},
   {k:'gap', ic:'pencil', en:'Fill the Gap', vi:'Điền vào chỗ trống', den:'Finish the sentence.', dvi:'Hoàn thành câu.'},
   {k:'search', ic:'search', en:'Word Search', vi:'Tìm chữ', den:'Find the hidden words.', dvi:'Tìm các từ bị giấu.'},
-  {k:'sort', ic:'sort', en:'Sort It', vi:'Phân loại', den:'Put each word in the right group.', dvi:'Xếp mỗi từ vào đúng nhóm.'}
+  {k:'sort', ic:'sort', en:'Sort It', vi:'Phân loại', den:'Put each word in the right group.', dvi:'Xếp mỗi từ vào đúng nhóm.'},
+  {k:'challenge', ic:'trophy', extra:true, en:'Super Challenge', vi:'Thử thách siêu cấp', den:'Type the words against the clock. No hints!', dvi:'Gõ từ thật nhanh trước khi hết giờ. Không có gợi ý!'}
 ];
 var T = {
-  en:{choose:'Choose your lesson',hello:'Learn the new words before class!',code:'Have a code from your teacher?',go:'Go',none:'No lessons yet. Ask your teacher for the link.',words:'words',grade:'Grade',start:'Start here',back:'Back',tap:'Tap the card to turn it over',know:'I know it!',still:'Still learning',again:'Practise these again',next:'Next',well:'Well done!',playagain:'Play again',menu:'All activities',done:'Finished',cert:'Get my certificate',certTitle:'is ready for class!',certSub:'Take a screenshot and send it to your teacher.',yourname:'Your name',class:'Class',ready:'Finish all the activities to grow your flower.',stage:['A seed','A sprout','A young plant','A flower!'],listen:'Tap the speaker, then choose the picture.',which:'Which word means this?',whichp:'Which word is this?',clear:'Clear',hint:'Hear it',found:'Found',sortq:'Which group?',notfound:'We could not find that code.',mistakes:'mistakes',round:'Round',of:'of',grown:'Your plant is growing!'},
-  vi:{choose:'Chọn bài học',hello:'Học từ mới trước khi đến lớp!',code:'Em có mã từ thầy cô không?',go:'Vào',none:'Chưa có bài học. Hãy hỏi thầy cô đường link.',words:'từ',grade:'Lớp',start:'Bắt đầu ở đây',back:'Quay lại',tap:'Chạm vào thẻ để lật',know:'Em biết rồi!',still:'Em cần học thêm',again:'Luyện lại các từ này',next:'Tiếp',well:'Giỏi lắm!',playagain:'Chơi lại',menu:'Tất cả hoạt động',done:'Đã xong',cert:'Nhận giấy khen',certTitle:'đã sẵn sàng cho bài học!',certSub:'Chụp màn hình và gửi cho thầy cô nhé.',yourname:'Tên em',class:'Lớp',ready:'Hoàn thành tất cả hoạt động để cây ra hoa.',stage:['Hạt giống','Mầm non','Cây con','Cây ra hoa!'],listen:'Chạm loa để nghe, rồi chọn tranh.',which:'Từ nào có nghĩa này?',whichp:'Đây là từ gì?',clear:'Xoá',hint:'Nghe',found:'Đã tìm',sortq:'Nhóm nào?',notfound:'Không tìm thấy mã này.',mistakes:'lỗi',round:'Vòng',of:'/',grown:'Cây của em đang lớn!'}
+  en:{choose:'Choose your lesson',hello:'Learn the new words before class!',code:'Have a code from your teacher?',go:'Go',none:'No lessons yet. Ask your teacher for the link.',words:'words',grade:'Grade',start:'Start here',back:'Back',tap:'Tap the card to turn it over',know:'I know it!',still:'Still learning',again:'Practise these again',next:'Next',well:'Well done!',playagain:'Play again',menu:'All activities',done:'Finished',cert:'Get my certificate',certTitle:'is ready for class!',certSub:'Take a screenshot and send it to your teacher.',yourname:'Your name',class:'Class',ready:'Finish all the activities to grow your flower.',stage:['A seed','A sprout','A young plant','A flower!'],listen:'Tap the speaker, then choose the picture.',which:'Which word means this?',whichp:'Which word is this?',clear:'Clear',hint:'Hear it',found:'Found',sortq:'Which group?',notfound:'We could not find that code.',mistakes:'mistakes',round:'Round',of:'of',grown:'Your plant is growing!',hintb:'Hint',hintleft:'hints used',zone:'Challenge zone',zoneSub:'For word champions. Ready to test yourself?',best:'Best score',go2:'Start the challenge',time:'Time',typeMean:'Type the word that means:',typeHear:'Listen and type the word:',typePic:'Type the word for this picture:',check:'Check',skip:'Skip',close:'So close! Check the spelling.',answerWas:'The answer was',streak:'in a row',timesup:'Time is up!',newbest:'New best score!',points:'points',correct:'correct'},
+  vi:{choose:'Chọn bài học',hello:'Học từ mới trước khi đến lớp!',code:'Em có mã từ thầy cô không?',go:'Vào',none:'Chưa có bài học. Hãy hỏi thầy cô đường link.',words:'từ',grade:'Lớp',start:'Bắt đầu ở đây',back:'Quay lại',tap:'Chạm vào thẻ để lật',know:'Em biết rồi!',still:'Em cần học thêm',again:'Luyện lại các từ này',next:'Tiếp',well:'Giỏi lắm!',playagain:'Chơi lại',menu:'Tất cả hoạt động',done:'Đã xong',cert:'Nhận giấy khen',certTitle:'đã sẵn sàng cho bài học!',certSub:'Chụp màn hình và gửi cho thầy cô nhé.',yourname:'Tên em',class:'Lớp',ready:'Hoàn thành tất cả hoạt động để cây ra hoa.',stage:['Hạt giống','Mầm non','Cây con','Cây ra hoa!'],listen:'Chạm loa để nghe, rồi chọn tranh.',which:'Từ nào có nghĩa này?',whichp:'Đây là từ gì?',clear:'Xoá',hint:'Nghe',found:'Đã tìm',sortq:'Nhóm nào?',notfound:'Không tìm thấy mã này.',mistakes:'lỗi',round:'Vòng',of:'/',grown:'Cây của em đang lớn!',hintb:'Gợi ý',hintleft:'lần dùng gợi ý',zone:'Khu thử thách',zoneSub:'Dành cho nhà vô địch từ vựng. Em sẵn sàng chưa?',best:'Điểm cao nhất',go2:'Bắt đầu thử thách',time:'Thời gian',typeMean:'Gõ từ có nghĩa là:',typeHear:'Nghe và gõ từ:',typePic:'Gõ từ cho bức tranh này:',check:'Kiểm tra',skip:'Bỏ qua',close:'Gần đúng rồi! Kiểm tra chính tả nhé.',answerWas:'Đáp án là',streak:'liên tiếp',timesup:'Hết giờ!',newbest:'Điểm cao mới!',points:'điểm',correct:'đúng'}
 };
 
 /* ---------- state ---------- */
@@ -386,7 +408,7 @@ function I(k, cls){ return h('img',{class:'ico'+(cls?' '+cls:''), src:ICONS[k]||
 var STAGE_ICONS = ['seed','sprout','herb','flower'];
 function growth(st, cls){ return h('div',{class:'growth'+(cls?' '+cls:''), 'aria-hidden':'true'}, h('img',{src:ICONS[STAGE_ICONS[st]], alt:''})); }
 function starRow(n, cls){ var r=h('div',{class:cls||'stars', role:'img', 'aria-label':n+' stars'}); for (var i=0;i<3;i++) r.append(I('star', i<n?'':'off')); return r; }
-var GAME_TINT = {flash:2, match:1, listen:4, memory:5, quiz:6, spell:3, gap:2, search:1, sort:4};
+var GAME_TINT = {flash:2, match:1, listen:4, memory:5, quiz:6, spell:3, gap:2, search:1, sort:4, challenge:2};
 var $app = document.getElementById('app');
 var CAP = {user:null, artifact:null, sample:null, downloads:null};
 var IS_TEACHER = false;
@@ -454,7 +476,27 @@ function lettersOnly(w){ return (w||'').toUpperCase().replace(/[^A-Z]/g,''); }
 
 /* ---------- sound & speech ---------- */
 var actx = null;
+function ting(){
+  /* two bright bell strikes: "ting-ting" */
+  if (muted) return;
+  try {
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    if (actx.state === 'suspended') actx.resume();
+    var now = actx.currentTime;
+    [[1568,0],[2093,0.13]].forEach(function(n){
+      [[1,0.26,0.9],[2.76,0.07,0.35],[5.4,0.025,0.18]].forEach(function(p){
+        var o = actx.createOscillator(), g = actx.createGain(), t0 = now + n[1];
+        o.type = 'sine'; o.frequency.value = n[0]*p[0];
+        g.gain.setValueAtTime(0.0001, t0);
+        g.gain.exponentialRampToValueAtTime(p[1], t0 + 0.006);
+        g.gain.exponentialRampToValueAtTime(0.0001, t0 + p[2]);
+        o.connect(g); g.connect(actx.destination); o.start(t0); o.stop(t0 + p[2] + 0.05);
+      });
+    });
+  } catch(e){}
+}
 function beep(kind){
+  if (kind === 'ok') return ting();
   if (muted) return;
   try {
     actx = actx || new (window.AudioContext || window.webkitAudioContext)();
@@ -677,8 +719,12 @@ function prog(code){ try { return JSON.parse(lsGet('fs:p:'+code)) || {} } catch(
 function saveProg(code, game, stars){
   var p = prog(code); p[game] = Math.max(p[game]||0, stars); lsSet('fs:p:'+code, JSON.stringify(p));
 }
+function extraGames(a){
+  return GAMES.filter(function(g){ return g.extra && !(a.games && a.games[g.k] === false) && (a.words||[]).filter(function(w){ return lettersOnly(w.word).length >= 2; }).length >= 3; });
+}
 function enabledGames(a){
   return GAMES.filter(function(g){
+    if (g.extra) return false;
     if (!a.games || !a.games[g.k]) return false;
     var ws = a.words || [];
     if (g.k==='sort') return (a.categories||[]).length>=2 && ws.filter(function(w){return w.category}).length>=3;
@@ -775,6 +821,16 @@ function sHub(w){
     ));
   });
   w.append(grid);
+  extraGames(a).forEach(function(g){
+    var best = +(lsGet('fs:best:'+a.code)||0);
+    w.append(h('button',{class:'zone', onclick:function(){ go({name:'game', id:a.id, g:g.k}); }},
+      h('span',{class:'pod', style:'--tint:var(--t2)'}, I(g.ic)),
+      h('span',{class:'stack', style:'gap:2px;min-width:0;flex:1'},
+        h('span',{class:'eyebrow'}, t('zone')),
+        h('strong',null, LANG==='vi'?g.vi:g.en),
+        h('span',{class:'small muted'}, t('zoneSub')+' '+(LANG==='vi'?g.dvi:g.den))),
+      best ? h('span',{class:'zone-best'}, I('glow'), h('span',null, h('b',null,best), h('small',null,t('best')))) : null));
+  });
   var allDone = gs.every(function(g){return p[g.k]});
   w.append(h('div',{class:'row', style:'margin-top:22px'},
     h('button',{class:'btn '+(allDone?'sun':''), disabled:!allDone, onclick:function(){go({name:'cert', id:a.id})}}, I('medal'), t('cert')),
@@ -812,13 +868,19 @@ function sGame(w){
     h('h2',null, I(g.ic), (LANG==='vi'?g.vi:g.en)),
     h('span',{class:'score', id:'g-score'})
   );
+  var hintBtn = h('button',{class:'btn sm sun hintbtn', hidden:true, onclick:function(){ if (api.hint) { api.hints++; hintCount.textContent = api.hints ? ' ('+api.hints+')' : ''; api.hint(); } }}, I('bulb'), t('hintb'));
+  var hintCount = h('span',null,'');
+  hintBtn.append(hintCount);
+  head.insertBefore(hintBtn, head.lastChild);
   w.append(head);
   var stage = h('div',{class:'stack'}); w.append(stage);
   var api = {
-    a:a, el:stage, mistakes:0,
+    a:a, el:stage, mistakes:0, hints:0, hint:null,
+    setHint:function(fn){ api.hint = fn; hintBtn.hidden = !fn; },
     setScore:function(s){ var e=document.getElementById('g-score'); if (e) e.textContent=s; },
     finish:function(){
-      var m = api.mistakes, st = m===0?3:m<=2?2:1;
+      hintBtn.hidden = true;
+      var m = api.mistakes + Math.floor(api.hints/2), st = m===0?3:m<=2?2:1;
       if (g.k==='flash') st = 3;
       saveProg(a.code, g.k, st);
       stage.textContent=''; beep('win'); confetti();
@@ -827,16 +889,17 @@ function sGame(w){
         growth(stageOf(a)),
         h('h2',{class:'t3d'},t('well')),
         starRow(st,'big-stars'),
-        g.k!=='flash' ? h('p',{class:'muted'}, m+' '+t('mistakes')) : null,
+        g.k!=='flash' ? h('p',{class:'muted'}, api.mistakes+' '+t('mistakes')+(api.hints ? ' · '+api.hints+' '+t('hintleft') : '')) : null,
         h('div',{class:'row', style:'justify-content:center'},
           nx ? h('button',{class:'btn primary', onclick:function(){go({name:'game', id:a.id, g:nx.k})}}, t('next')+': '+(LANG==='vi'?nx.vi:nx.en)+' →')
              : h('button',{class:'btn sun', onclick:function(){go({name:'cert', id:a.id})}}, I('medal'), t('cert')),
+          extraGames(a).length && g.k!=='challenge' && !nx ? h('button',{class:'btn', onclick:function(){go({name:'game', id:a.id, g:'challenge'})}}, I('trophy'), LANG==='vi'?'Thử thách siêu cấp':'Super Challenge') : null,
           h('button',{class:'btn', onclick:function(){go(view)}}, t('playagain')),
           h('button',{class:'btn ghost', onclick:function(){go({name:'hub', id:a.id})}}, t('menu')))
       ));
     }
   };
-  ({flash:gFlash, match:gMatch, listen:gListen, memory:gMemory, quiz:gQuiz, spell:gSpell, gap:gGap, search:gSearch, sort:gSort}[g.k])(api);
+  ({flash:gFlash, match:gMatch, listen:gListen, memory:gMemory, quiz:gQuiz, spell:gSpell, gap:gGap, search:gSearch, sort:gSort, challenge:gChallenge}[g.k])(api);
 }
 
 /* ---- 1 flashcards ---- */
@@ -898,7 +961,8 @@ function gMatch(api){
       b.addEventListener('dragstart', function(e){ sel=b; e.dataTransfer.setData('text/plain', w.id); });
       wordsCol.append(b);
     });
-    shuffle(set).forEach(function(w){
+    var picOrder = shuffle(set), shuffleIdx = picOrder.map(function(w){ return set.indexOf(w); });
+    picOrder.forEach(function(w){
       var b = h('button',{class:'tile', 'aria-label':'Picture'}, pic(w,'sm'));
       function tryIt(){
         if (!sel || b.classList.contains('done')) return;
@@ -913,6 +977,13 @@ function gMatch(api){
       picsCol.append(b);
     });
     api.el.append(h('div',{class:'match'}, wordsCol, picsCol));
+    api.setHint(function(){
+      var wb = Array.prototype.find.call(wordsCol.children, function(b){ return !b.classList.contains('done'); }); if (!wb) return;
+      var id = wb.getAttribute('data-id'), idx = set.findIndex(function(x){return x.id===id});
+      var pb = picsCol.children[shuffleIdx.indexOf(idx)];
+      [wb, pb].forEach(function(el){ if (!el) return; el.classList.remove('glowhint'); void el.offsetWidth; el.classList.add('glowhint'); });
+      speak(set[idx].word);
+    });
   }
   draw();
 }
@@ -926,9 +997,15 @@ function mcRun(api, qs, buildPrompt, optLabel){
     api.el.textContent=''; api.setScore((i+1)+' '+t('of')+' '+qs.length);
     var q = qs[i], answered = false;
     api.el.append(buildPrompt(q));
-    var box = h('div',{class:'opts'});
+    var box = h('div',{class:'opts'}), wrongBtns = [];
+    api.setHint(function(){
+      var left = wrongBtns.filter(function(b){ return !b.disabled; });
+      if (left.length <= 1) { speak(q.w.word.charAt(0)); toast((LANG==='vi'?'Từ bắt đầu bằng ':'It starts with ')+'"'+q.w.word.charAt(0).toUpperCase()+'"'); return; }
+      var b = left[Math.floor(Math.random()*left.length)]; b.disabled = true; b.classList.add('gone-opt');
+    });
     q.opts.forEach(function(o){
       var b = h('button',{class:'opt'+(optLabel==='pic'?' picopt':'')}, optLabel==='pic' ? pic(o,'sm') : o.word);
+      if (o.id !== q.w.id) wrongBtns.push(b);
       b.addEventListener('click', function(){
         if (answered) return;
         if (o.id === q.w.id){ answered=true; b.classList.add('ok'); beep('ok'); speak(q.w.word); setTimeout(function(){ i++; draw(); }, 900); }
@@ -982,6 +1059,14 @@ function gMemory(api){
     grid.append(b);
   });
   api.el.append(grid);
+  api.setHint(function(){
+    if (lock || open.length) return;
+    var rest = cards.filter(function(c){ return !c.b.classList.contains('gone'); }); if (!rest.length) return;
+    var pick = rest[0].w.id, pair = rest.filter(function(c){ return c.w.id === pick; });
+    lock = true;
+    pair.forEach(function(c){ c.b.classList.add('open','glowhint'); c.b.textContent=''; c.b.append(c.kind==='word' ? c.w.word : pic(c.w,'xs')); });
+    setTimeout(function(){ pair.forEach(function(c){ c.b.classList.remove('open','glowhint'); c.b.textContent=''; c.b.append(I('sprout')); }); lock = false; }, 1300);
+  });
   var origFinish = api.finish; api.finish = function(){ api.mistakes = Math.max(0, api.mistakes - set.length); origFinish(); };
 }
 
@@ -1029,6 +1114,13 @@ function gSpell(api){
     api.el.append(h('div',{class:'qcard'}, pic(w), h('p',{class:'qtext'}, w.meaning),
       h('div',{class:'row', style:'justify-content:center'}, sayBtn(w.word, true), h('button',{class:'btn sm', onclick:function(){placed=[]; refresh();}}, t('clear')))));
     api.el.append(slots, bank); refresh();
+    api.setHint(function(){
+      var k = 0; while (k < placed.length && tiles[placed[k]].ch === letters[k]) k++;
+      placed = placed.slice(0, k);
+      if (k >= letters.length) return;
+      var need = letters[k], idx = tiles.findIndex(function(tl, j){ return tl.ch === need && placed.indexOf(j) < 0; });
+      if (idx >= 0) { placed.push(idx); refresh(); check(); }
+    });
   }
   draw();
 }
@@ -1096,6 +1188,11 @@ function gSearch(api){
   })(x,y);
   api.el.append(h('p',{class:'note small'}, LANG==='vi' ? 'Chạm vào chữ cái đầu tiên, rồi chạm vào chữ cái cuối cùng của từ.' : 'Tap the first letter of a word, then tap its last letter.'));
   api.el.append(h('div',{class:'ws-board'}, box), list); drawList();
+  api.setHint(function(){
+    var p = placed.find(function(x){ return !x.got; }); if (!p) return;
+    var c = cells[p.y0*N + p.x0]; c.classList.remove('glowhint'); void c.offsetWidth; c.classList.add('glowhint');
+    speak(p.w.word); toast((LANG==='vi'?'Tìm từ ':'Look for ')+'"'+p.w.word+'"');
+  });
   var orig = api.finish; api.finish = function(){ api.mistakes = Math.max(0, api.mistakes-2); orig(); };
 }
 
@@ -1117,8 +1214,104 @@ function gSort(api){
       bins.append(b);
     });
     api.el.append(bins);
+    api.setHint(function(){
+      var wrong = Array.prototype.filter.call(bins.children, function(b){ return b.textContent !== w.category && !b.disabled; });
+      if (wrong.length >= 2 || (wrong.length === 1 && cats.length > 2)) { var b = wrong[0]; b.disabled = true; b.classList.add('gone-opt'); }
+      else toast(w.meaning, 4000);
+    });
   }
   draw();
+}
+
+/* ---- 10 super challenge ---- */
+function normWord(s){ return String(s||'').toLowerCase().replace(/[^a-z]/g,''); }
+function editDist(a, b){
+  var d = []; for (var i=0;i<=a.length;i++){ d[i]=[i]; } for (var j=0;j<=b.length;j++) d[0][j]=j;
+  for (i=1;i<=a.length;i++) for (j=1;j<=b.length;j++) d[i][j] = Math.min(d[i-1][j]+1, d[i][j-1]+1, d[i-1][j-1]+(a[i-1]===b[j-1]?0:1));
+  return d[a.length][b.length];
+}
+function gChallenge(api){
+  api.setHint(null);
+  var a = api.a, TOTAL = 90, left = TOTAL, score = 0, streak = 0, right = 0, asked = 0, answered = 0, done = false;
+  var words = a.words.filter(function(w){ return normWord(w.word).length >= 2; });
+  var deck = [], timer = null;
+  function nextWord(){ if (!deck.length) deck = shuffle(words); return deck.pop(); }
+  var timeBar = h('i'), timeTxt = h('b',null,TOTAL+'s'), scoreTxt = h('b',null,'0'), streakTxt = h('span',{class:'chip'}, '');
+  var hud = h('div',{class:'hud clay'},
+    h('div',{class:'row', style:'gap:6px'}, I('glow'), scoreTxt, h('span',{class:'small muted'}, t('points'))),
+    streakTxt,
+    h('div',{class:'row', style:'gap:6px'}, h('span',{class:'small muted'}, t('time')), timeTxt));
+  var meter = h('div',{class:'meter timer'}, timeBar);
+  var qbox = h('div',{class:'stack'});
+  function intro(){
+    api.el.textContent='';
+    var best = +(lsGet('fs:best:'+a.code)||0);
+    api.el.append(h('div',{class:'done-box clay', style:'padding:26px'},
+      I('trophy','medal'),
+      h('h2',{class:'t3d'}, LANG==='vi'?'Thử thách siêu cấp':'Super Challenge'),
+      h('p',{class:'qtext', style:'max-width:40ch'}, LANG==='vi' ? 'Em có 90 giây. Đọc nghĩa, nghe hoặc xem tranh rồi GÕ đúng từ. Trả lời đúng liên tiếp để được thêm điểm!' : 'You have 90 seconds. Read the meaning, listen, or look at the picture, then TYPE the word. Get answers right in a row for bonus points!'),
+      best ? h('p',{class:'muted'}, t('best')+': '+best+' '+t('points')) : null,
+      h('button',{class:'btn sun', onclick:start}, I('rocket'), t('go2'))));
+  }
+  function start(){
+    api.el.textContent=''; api.el.append(hud, meter, qbox);
+    left = TOTAL; score = 0; streak = 0; right = 0; asked = 0; answered = 0; done = false;
+    tick(); timer = setInterval(function(){ if (!api.el.isConnected) { clearInterval(timer); return; } left--; tick(); if (left <= 0) end(); }, 1000);
+    ask();
+  }
+  function tick(){ timeTxt.textContent = Math.max(0,left)+'s'; timeBar.style.width = Math.max(0,left/TOTAL*100)+'%'; timeBar.classList.toggle('low', left <= 15); scoreTxt.textContent = score; streakTxt.textContent = streak >= 2 ? '🔥 '+streak+' '+t('streak') : ''; streakTxt.hidden = streak < 2; }
+  function ask(){
+    if (done) return;
+    var w = nextWord(); asked++;
+    var types = ['mean','pic','hear']; var type = types[Math.floor(Math.random()*types.length)];
+    if (type==='mean' && !w.meaning) type = 'pic';
+    qbox.textContent = '';
+    var input = h('input',{class:'inp big-inp', id:'ch-in', autocomplete:'off', autocapitalize:'off', spellcheck:'false', 'aria-label':'Type the word', placeholder:'…'});
+    var msg = h('div',{class:'small', 'aria-live':'polite', style:'min-height:1.4em;font-weight:800'});
+    var prompt = type==='mean' ? h('div',{class:'qcard'}, h('div',{class:'eyebrow'}, t('typeMean')), h('p',{class:'qtext'}, w.meaning))
+      : type==='pic' ? h('div',{class:'qcard'}, h('div',{class:'eyebrow'}, t('typePic')), pic(w))
+      : h('div',{class:'qcard'}, h('div',{class:'eyebrow'}, t('typeHear')), h('div',{class:'row', style:'justify-content:center'}, sayBtn(w.word), h('button',{class:'btn sm', 'aria-label':'Say it slowly', onclick:function(){ var o=slowTalk; slowTalk=true; speak(w.word); slowTalk=o; }}, I('turtle'))));
+    var tries = 0;
+    function submit(e){
+      if (e) e.preventDefault(); if (done) return;
+      var got = normWord(input.value), want = normWord(w.word);
+      if (!got) return;
+      if (got === want) {
+        streak++; right++; answered++; score += 10 + Math.min(streak-1, 5)*2; ting(); tick();
+        input.classList.add('right'); msg.textContent = '✓ '+w.word;
+        setTimeout(ask, 650);
+      } else if (tries === 0 && editDist(got, want) <= Math.max(1, Math.floor(want.length/6))) {
+        tries++; msg.textContent = t('close'); input.select();
+      } else {
+        streak = 0; answered++; tick(); beep('no'); input.classList.add('wrong');
+        msg.textContent = t('answerWas')+': '+w.word; speak(w.word);
+        setTimeout(ask, 1500);
+      }
+    }
+    qbox.append(prompt, h('form',{class:'copyline', onsubmit:submit}, input, h('button',{class:'btn primary', type:'submit'}, I('check'), t('check')),
+      h('button',{class:'btn ghost sm', type:'button', onclick:function(){ if (done) return; streak = 0; answered++; tick(); msg.textContent = t('answerWas')+': '+w.word; setTimeout(ask, 1200); }}, t('skip'))), msg);
+    if (type==='hear') setTimeout(function(){ speak(w.word); }, 200);
+    setTimeout(function(){ try { input.focus(); } catch(e){} }, 50);
+  }
+  function end(){
+    if (done) return; done = true; clearInterval(timer);
+    var best = +(lsGet('fs:best:'+a.code)||0), isBest = score > best;
+    if (isBest) lsSet('fs:best:'+a.code, String(score));
+    var st = right >= words.length ? 3 : right >= Math.ceil(words.length/2) ? 2 : right >= 1 ? 1 : 0;
+    if (st) saveProg(a.code, 'challenge', st);
+    api.el.textContent=''; beep('win'); if (right) confetti();
+    api.el.append(h('div',{class:'done-box'},
+      I('trophy','medal'),
+      h('h2',{class:'t3d'}, t('timesup')),
+      h('div',{class:'bigscore'}, score, h('small',null,' '+t('points'))),
+      isBest && score ? h('span',{class:'chip live'}, t('newbest')) : h('p',{class:'muted'}, t('best')+': '+Math.max(best,score)),
+      h('p',{class:'muted'}, right+' / '+answered+' '+t('correct')),
+      st ? starRow(st,'big-stars') : null,
+      h('div',{class:'row', style:'justify-content:center'},
+        h('button',{class:'btn sun', onclick:start}, I('rocket'), t('playagain')),
+        h('button',{class:'btn ghost', onclick:function(){go({name:'hub', id:a.id})}}, t('menu')))));
+  }
+  intro();
 }
 
 /* =========================================================
@@ -1447,7 +1640,7 @@ function tEdit(w){
   var cats = h('input',{class:'inp', id:'e-cats', value:(act.categories||[]).join(', '), placeholder:'e.g. Living, Non-living', oninput:function(){ act.categories = cats.value.split(',').map(function(s){return s.trim()}).filter(Boolean).slice(0,4); touch(); renderWords(); }});
   var showVi = h('input',{type:'checkbox', id:'e-vi', checked:!!act.showVi, onchange:function(){ act.showVi=showVi.checked; touch(); }});
   var togs = h('div',{class:'togs'}, GAMES.map(function(g){
-    var cb = h('input',{type:'checkbox', id:'g-'+g.k, checked:!!(act.games&&act.games[g.k]), onchange:function(){ act.games[g.k]=cb.checked; touch(); }});
+    var cb = h('input',{type:'checkbox', id:'g-'+g.k, checked: g.extra ? !(act.games && act.games[g.k]===false) : !!(act.games&&act.games[g.k]), onchange:function(){ act.games[g.k]=cb.checked; touch(); }});
     return h('label',{class:'tog', for:'g-'+g.k}, cb, I(g.ic), g.en);
   }));
   w.append(h('div',{class:'panel stack'},
