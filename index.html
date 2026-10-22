@@ -476,17 +476,38 @@ function lettersOnly(w){ return (w||'').toUpperCase().replace(/[^A-Z]/g,''); }
 
 /* ---------- sound & speech ---------- */
 var actx = null;
-var SND = {}, lastSnd = 0;
+var SND = {}, SBUF = {}, lastSnd = 0, mediaOK = null;
+function audioCtx(){
+  try { actx = actx || new (window.AudioContext || window.webkitAudioContext)(); if (actx.state === 'suspended') actx.resume(); return actx; } catch(e){ return null; }
+}
+function b64ToBuf(d){ var b = atob(d.split(',')[1]), u = new Uint8Array(b.length); for (var i=0;i<b.length;i++) u[i] = b.charCodeAt(i); return u.buffer; }
+function loadBuf(k){
+  if (SBUF[k]) return SBUF[k];
+  var c = audioCtx(); if (!c) return Promise.reject();
+  SBUF[k] = new Promise(function(res, rej){ try { var r = c.decodeAudioData(b64ToBuf(ICONS['snd_'+k]), res, rej); if (r && r.then) r.then(res, rej); } catch(e){ rej(e); } });
+  return SBUF[k];
+}
+function playBuf(k){
+  var c = audioCtx(); if (!c) return;
+  loadBuf(k).then(function(buf){ var s = c.createBufferSource(), g = c.createGain(); g.gain.value = 1; s.buffer = buf; s.connect(g); g.connect(c.destination); s.start(); }).catch(function(){});
+}
 function playSnd(k){
   if (muted) return;
+  lastSnd = Date.now();
+  if (mediaOK === false) { playBuf(k); return; }
   try {
     var a = SND[k];
     if (!a) { a = SND[k] = new Audio(ICONS['snd_'+k]); a.preload = 'auto'; }
     else if (!a.paused) { a = new Audio(ICONS['snd_'+k]); }
-    a.volume = 1; a.currentTime = 0; lastSnd = Date.now();
-    var p = a.play(); if (p && p.catch) p.catch(function(){});
-  } catch(e){}
+    a.volume = 1; a.currentTime = 0;
+    var p = a.play();
+    if (p && p.then) p.then(function(){ mediaOK = true; }, function(){ mediaOK = false; playBuf(k); });
+    else mediaOK = true;
+    a.onerror = function(){ if (mediaOK !== true) { mediaOK = false; playBuf(k); } };
+  } catch(e){ mediaOK = false; playBuf(k); }
 }
+/* unlock audio on the first tap so the very first sound is never lost */
+document.addEventListener('pointerdown', function unlock(){ var c = audioCtx(); if (c) { loadBuf('ting').catch(function(){}); loadBuf('brr').catch(function(){}); } document.removeEventListener('pointerdown', unlock, true); }, true);
 function ting(){ playSnd('ting'); }
 function beep(kind){
   if (kind === 'ok') return ting();
