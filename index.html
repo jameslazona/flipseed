@@ -92,6 +92,7 @@ a{color:var(--sky)}
 @media (max-width:560px){.hero-logo{flex-basis:auto;width:min(230px,70%);margin:0 auto}}
 [hidden]{display:none!important}
 .linkstrip{margin-top:4px}
+.buildtag{margin-top:28px;text-align:center;font-size:.75rem;color:var(--muted);opacity:.8}
 .sfx-row{display:grid;grid-template-columns:160px 1fr;gap:12px;align-items:center;padding:10px 0;border-top:1px dashed var(--line)}
 @media (max-width:640px){.sfx-row{grid-template-columns:1fr}}
 .sfx-label{font-family:var(--f-display);font-size:1.05rem}
@@ -796,9 +797,11 @@ function topBar(student){
 
 /* ---------- routing ---------- */
 function go(v){ if (['studio','create','share','edit'].indexOf(v.name)>=0) PREVIEW = null; view = v; if (window.speechSynthesis) try{speechSynthesis.cancel()}catch(e){}; render(); window.scrollTo(0,0); }
+var BUILD = 'Update 22 Oct · 8:05 pm · sounds v3';
 function render(){
   $app.textContent = '';
   var w = h('div',{class:'wrap'}); $app.append(w);
+  setTimeout(function(){ w.append(h('p',{class:'buildtag'}, BUILD)); }, 0);
   var V = {
     home:sHome, hub:sHub, game:sGame, cert:sCert,
     studio:tStudio, create:tCreate, edit:tEdit, share:tShare
