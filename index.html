@@ -1143,6 +1143,7 @@ function exportSite(){
     .catch(function(e){ if (e && e.code !== 'declined') toast('The file could not be saved here.', 4000); });
 }
 function isSiteLink(){ return !!(DATA.settings.link && DATA.settings.link.indexOf('claude.ai/') < 0); }
+function isAutoSite(){ return !!(DATA.settings.link && DATA.settings.link.indexOf('github.io') >= 0); }
 function zaloMsg(a){
   var l = studentLink(a), c = a.code.toUpperCase();
   return 'Hello class! Before our next Science lesson, please learn the new words for "'+a.title+'" here: '+l+' (code: '+c+')\n\n' +
@@ -1208,14 +1209,15 @@ function tStudio(w){
   w.append(h('div',{class:'panel stack', style:'margin-top:28px'},
     h('h3',{class:'row', style:'gap:8px'}, I('globe'), 'Student website ', isSiteLink() ? h('span',{class:'chip live'}, 'Set up') : h('span',{class:'chip draft'}, 'Not set up yet')),
     h('p',{class:'small muted'}, 'Students open activities from your own free website, so links go straight to the activity with no Claude page, no login and no account. You set it up once, then update it with one file whenever you publish or change an activity.'),
-    isSiteLink() && stale ? h('p',{class:'note warn small'}, 'You published or changed an activity since your last upload. Download the website file again and upload it, so students see the newest version.') : null,
-    step('1', 'Download your student website', h('div',{class:'row'}, h('button',{class:'btn primary sm', onclick:exportSite}, I('inbox'), 'Download website file (index.html)'), h('span',{class:'small muted'}, 'It holds all your live activities.'))),
-    step('2', 'Put it online (free, about 3 minutes the first time)', h('div',{class:'stack', style:'gap:4px'},
+    isAutoSite() ? h('p',{class:'note small'}, 'Your website updates itself automatically about once an hour. When you publish or change an activity, its link starts working (or shows the new version) within the hour. You do not need to download or upload anything.') : null,
+    isSiteLink() && !isAutoSite() && stale ? h('p',{class:'note warn small'}, 'You published or changed an activity since your last upload. Download the website file again and upload it, so students see the newest version.') : null,
+    isAutoSite() ? null : step('1', 'Download your student website', h('div',{class:'row'}, h('button',{class:'btn primary sm', onclick:exportSite}, I('inbox'), 'Download website file (index.html)'), h('span',{class:'small muted'}, 'It holds all your live activities.'))),
+    isAutoSite() ? null : step('2', 'Put it online (free, about 3 minutes the first time)', h('div',{class:'stack', style:'gap:4px'},
       h('span',{class:'small'}, 'On your computer, make a new folder called flipseed and move the index.html file into it.'),
       h('span',{class:'small'}, 'Open ', h('a',{href:'https://app.netlify.com/drop', target:'_blank', rel:'noopener'}, 'app.netlify.com/drop'), ', sign up free (Google sign-in is fine), then drag the flipseed folder onto the page.'),
       h('span',{class:'small'}, 'Netlify gives you an address like https://bright-seed-123.netlify.app. You can rename it under Site configuration → Change site name, for example grit-flipseed.'),
       h('span',{class:'small muted'}, 'To update later: open your site in Netlify → Deploys → drag the new flipseed folder in. The address stays the same.'))),
-    step('3', 'Paste your website address here', h('div',{class:'copyline'}, siteIn,
+    step(isAutoSite() ? '✓' : '3', isAutoSite() ? 'Your website address' : 'Paste your website address here', h('div',{class:'copyline'}, siteIn,
       h('button',{class:'btn primary sm', onclick:function(){ var v=siteIn.value.trim(); if (v && !/^https:\/\//i.test(v)) { toast('The address should start with https://', 3500); return; } DATA.settings.link = v.replace(/\/index\.html$/i,'').replace(/#.*$/,''); savePage({name:'studio'}, v ? 'Website saved. All student links now use it.' : 'Website address removed'); }}, 'Save'))),
     h('div',{class:'stack', style:'gap:6px'},
       h('span',{class:'small', style:'font-weight:800'}, isSiteLink() ? 'Home page of your student website (all live activities):' : 'Until your website is set up, links open FLIPSEED inside Claude (you must set Share to anyone with the link):'),
@@ -1609,7 +1611,8 @@ function tShare(w){
   if (a.status === 'published') {
     left.append(h('div',{class:'field'}, h('label',{for:'sh-link'},'Student link for this activity'), linkStrip(a, 'sh-link')));
     left.append(h('p',{class:'small muted'},'Send it in your class Zalo group or show the QR code in class. Students open it on any phone or computer. No login, no account.'));
-    if (isSiteLink() && siteStale()) left.append(h('div',{class:'note warn small stack', style:'gap:8px'}, 'Upload the newest website file first, or this link will not open the activity yet.', h('button',{class:'btn sm', style:'align-self:flex-start', onclick:exportSite}, I('inbox'), 'Download website file')));
+    if (isAutoSite() && siteStale()) left.append(h('p',{class:'note small'}, 'Your website picks up new and changed activities automatically within the hour.'));
+    else if (isSiteLink() && siteStale()) left.append(h('div',{class:'note warn small stack', style:'gap:8px'}, 'Upload the newest website file first, or this link will not open the activity yet.', h('button',{class:'btn sm', style:'align-self:flex-start', onclick:exportSite}, I('inbox'), 'Download website file')));
     else if (!isSiteLink()) left.append(h('p',{class:'note small'}, 'Tip: set up your free student website in the Studio (bottom of the page) so this link opens without the Claude page.'));
   } else {
     left.append(h('p',{class:'note warn'},'This activity is a draft. Publish it and its student link and QR code appear here.'));
