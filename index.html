@@ -92,6 +92,14 @@ a{color:var(--sky)}
 @media (max-width:560px){.hero-logo{flex-basis:auto;width:min(230px,70%);margin:0 auto}}
 [hidden]{display:none!important}
 .linkstrip{margin-top:4px}
+.who{max-width:520px;margin:10px auto 0;padding:26px 22px;display:flex;flex-direction:column;gap:14px}
+.who-art{position:relative;height:96px;display:grid;place-items:center}
+.who-art .w1{width:88px;height:88px;animation:bob 3.4s ease-in-out infinite}
+.who-art .w2{position:absolute;width:40px;height:40px;left:calc(50% + 40px);top:0;animation:bob 3s ease-in-out infinite -1s}
+.who-art .w3{position:absolute;width:44px;height:44px;right:calc(50% + 44px);bottom:0;animation:bob 3.8s ease-in-out infinite -2s}
+.whopill{display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap;margin:16px 0 0;padding:6px 8px 6px 12px;border-radius:999px;background:linear-gradient(180deg,var(--surface),var(--surface-2));box-shadow:inset 0 2px 0 var(--hi),0 4px 0 var(--depth);font-weight:700}
+.whopill .ico{width:28px;height:28px}
+.whopill .btn{margin-bottom:0}
 .buildtag{margin-top:28px;text-align:center;font-size:.75rem;color:var(--muted);opacity:.8}
 .sfx-row{display:grid;grid-template-columns:160px 1fr;gap:12px;align-items:center;padding:10px 0;border-top:1px dashed var(--line)}
 @media (max-width:640px){.sfx-row{grid-template-columns:1fr}}
@@ -403,8 +411,8 @@ var GAMES = [
   {k:'challenge', ic:'trophy', extra:true, en:'Super Challenge', vi:'Thử thách siêu cấp', den:'Type the words against the clock. No hints!', dvi:'Gõ từ thật nhanh trước khi hết giờ. Không có gợi ý!'}
 ];
 var T = {
-  en:{choose:'Choose your lesson',hello:'Learn the new words before class!',code:'Have a code from your teacher?',go:'Go',none:'No lessons yet. Ask your teacher for the link.',words:'words',grade:'Grade',start:'Start here',back:'Back',tap:'Tap the card to turn it over',know:'I know it!',still:'Still learning',again:'Practise these again',next:'Next',well:'Well done!',playagain:'Play again',menu:'All activities',done:'Finished',cert:'Get my certificate',certTitle:'is ready for class!',certSub:'Take a screenshot and send it to your teacher.',yourname:'Your name',class:'Class',ready:'Finish all the activities to grow your flower.',stage:['A seed','A sprout','A young plant','A flower!'],listen:'Tap the speaker, then choose the picture.',which:'Which word means this?',whichp:'Which word is this?',clear:'Clear',hint:'Hear it',found:'Found',sortq:'Which group?',notfound:'We could not find that code.',mistakes:'mistakes',round:'Round',of:'of',grown:'Your plant is growing!',hintb:'Hint',hintleft:'hints used',zone:'Challenge zone',zoneSub:'For word champions. Ready to test yourself?',best:'Best score',go2:'Start the challenge',time:'Time',typeMean:'Type the word that means:',typeHear:'Listen and type the word:',typePic:'Type the word for this picture:',check:'Check',skip:'Skip',close:'So close! Check the spelling.',answerWas:'The answer was',streak:'in a row',timesup:'Time is up!',newbest:'New best score!',points:'points',correct:'correct'},
-  vi:{choose:'Chọn bài học',hello:'Học từ mới trước khi đến lớp!',code:'Em có mã từ thầy cô không?',go:'Vào',none:'Chưa có bài học. Hãy hỏi thầy cô đường link.',words:'từ',grade:'Lớp',start:'Bắt đầu ở đây',back:'Quay lại',tap:'Chạm vào thẻ để lật',know:'Em biết rồi!',still:'Em cần học thêm',again:'Luyện lại các từ này',next:'Tiếp',well:'Giỏi lắm!',playagain:'Chơi lại',menu:'Tất cả hoạt động',done:'Đã xong',cert:'Nhận giấy khen',certTitle:'đã sẵn sàng cho bài học!',certSub:'Chụp màn hình và gửi cho thầy cô nhé.',yourname:'Tên em',class:'Lớp',ready:'Hoàn thành tất cả hoạt động để cây ra hoa.',stage:['Hạt giống','Mầm non','Cây con','Cây ra hoa!'],listen:'Chạm loa để nghe, rồi chọn tranh.',which:'Từ nào có nghĩa này?',whichp:'Đây là từ gì?',clear:'Xoá',hint:'Nghe',found:'Đã tìm',sortq:'Nhóm nào?',notfound:'Không tìm thấy mã này.',mistakes:'lỗi',round:'Vòng',of:'/',grown:'Cây của em đang lớn!',hintb:'Gợi ý',hintleft:'lần dùng gợi ý',zone:'Khu thử thách',zoneSub:'Dành cho nhà vô địch từ vựng. Em sẵn sàng chưa?',best:'Điểm cao nhất',go2:'Bắt đầu thử thách',time:'Thời gian',typeMean:'Gõ từ có nghĩa là:',typeHear:'Nghe và gõ từ:',typePic:'Gõ từ cho bức tranh này:',check:'Kiểm tra',skip:'Bỏ qua',close:'Gần đúng rồi! Kiểm tra chính tả nhé.',answerWas:'Đáp án là',streak:'liên tiếp',timesup:'Hết giờ!',newbest:'Điểm cao mới!',points:'điểm',correct:'đúng'}
+  en:{choose:'Choose your lesson',hello:'Learn the new words before class!',code:'Have a code from your teacher?',go:'Go',none:'No lessons yet. Ask your teacher for the link.',words:'words',grade:'Grade',start:'Start here',back:'Back',tap:'Tap the card to turn it over',know:'I know it!',still:'Still learning',again:'Practise these again',next:'Next',well:'Well done!',playagain:'Play again',menu:'All activities',done:'Finished',cert:'Get my certificate',certTitle:'is ready for class!',certSub:'Take a screenshot and send it to your teacher.',yourname:'Your name',whoName:"What's your name?",whoSub:'Type your name so your teacher can see all your great work.',letsgo:"Let's go!",notyou:'Not you?',change:'Change',needName:'Please type your name (at least 2 letters).',needClass:'Please choose your class.',privacy:'Your teacher will see your name and your scores.',hi:'Hi',chooseClass:'Choose your class',egName:'e.g. Minh',egClass:'e.g. 3A',class:'Class',ready:'Finish all the activities to grow your flower.',stage:['A seed','A sprout','A young plant','A flower!'],listen:'Tap the speaker, then choose the picture.',which:'Which word means this?',whichp:'Which word is this?',clear:'Clear',hint:'Hear it',found:'Found',sortq:'Which group?',notfound:'We could not find that code.',mistakes:'mistakes',round:'Round',of:'of',grown:'Your plant is growing!',hintb:'Hint',hintleft:'hints used',zone:'Challenge zone',zoneSub:'For word champions. Ready to test yourself?',best:'Best score',go2:'Start the challenge',time:'Time',typeMean:'Type the word that means:',typeHear:'Listen and type the word:',typePic:'Type the word for this picture:',check:'Check',skip:'Skip',close:'So close! Check the spelling.',answerWas:'The answer was',streak:'in a row',timesup:'Time is up!',newbest:'New best score!',points:'points',correct:'correct'},
+  vi:{choose:'Chọn bài học',hello:'Học từ mới trước khi đến lớp!',code:'Em có mã từ thầy cô không?',go:'Vào',none:'Chưa có bài học. Hãy hỏi thầy cô đường link.',words:'từ',grade:'Lớp',start:'Bắt đầu ở đây',back:'Quay lại',tap:'Chạm vào thẻ để lật',know:'Em biết rồi!',still:'Em cần học thêm',again:'Luyện lại các từ này',next:'Tiếp',well:'Giỏi lắm!',playagain:'Chơi lại',menu:'Tất cả hoạt động',done:'Đã xong',cert:'Nhận giấy khen',certTitle:'đã sẵn sàng cho bài học!',certSub:'Chụp màn hình và gửi cho thầy cô nhé.',yourname:'Tên em',whoName:'Em tên là gì?',whoSub:'Hãy gõ tên của em để thầy cô thấy em đã học chăm chỉ thế nào nhé.',letsgo:'Bắt đầu thôi!',notyou:'Không phải em?',change:'Đổi tên',needName:'Em hãy gõ tên nhé (ít nhất 2 chữ cái).',needClass:'Em hãy chọn lớp nhé.',privacy:'Thầy cô sẽ xem được tên và điểm của em.',hi:'Chào',chooseClass:'Chọn lớp',egName:'Ví dụ: Minh',egClass:'Ví dụ: 3A',class:'Lớp',ready:'Hoàn thành tất cả hoạt động để cây ra hoa.',stage:['Hạt giống','Mầm non','Cây con','Cây ra hoa!'],listen:'Chạm loa để nghe, rồi chọn tranh.',which:'Từ nào có nghĩa này?',whichp:'Đây là từ gì?',clear:'Xoá',hint:'Nghe',found:'Đã tìm',sortq:'Nhóm nào?',notfound:'Không tìm thấy mã này.',mistakes:'lỗi',round:'Vòng',of:'/',grown:'Cây của em đang lớn!',hintb:'Gợi ý',hintleft:'lần dùng gợi ý',zone:'Khu thử thách',zoneSub:'Dành cho nhà vô địch từ vựng. Em sẵn sàng chưa?',best:'Điểm cao nhất',go2:'Bắt đầu thử thách',time:'Thời gian',typeMean:'Gõ từ có nghĩa là:',typeHear:'Nghe và gõ từ:',typePic:'Gõ từ cho bức tranh này:',check:'Kiểm tra',skip:'Bỏ qua',close:'Gần đúng rồi! Kiểm tra chính tả nhé.',answerWas:'Đáp án là',streak:'liên tiếp',timesup:'Hết giờ!',newbest:'Điểm cao mới!',points:'điểm',correct:'đúng'}
 };
 
 /* ---------- state ---------- */
@@ -797,22 +805,92 @@ function topBar(student){
 
 /* ---------- routing ---------- */
 function go(v){ if (['studio','create','share','edit'].indexOf(v.name)>=0) PREVIEW = null; view = v; if (window.speechSynthesis) try{speechSynthesis.cancel()}catch(e){}; render(); window.scrollTo(0,0); }
-var BUILD = 'Update 22 Oct · 8:05 pm · sounds v3';
+var BUILD = 'Update 23 Oct · student names & tracking';
+var TRACK_CODE = "/* FLIPSEED student tracking\n   Paste this into your Google Sheet: Extensions \u2192 Apps Script.\n   Then Deploy \u2192 New deployment \u2192 Web app (Execute as: Me, Who has access: Anyone). */\n\nvar LOG = 'Activity log';\nvar SUM = 'Students';\nvar LOG_HEAD = ['Time', 'Student', 'Class', 'Activity', 'Code', 'What happened', 'Game', 'Stars', 'Mistakes', 'Hints used', 'Score', 'Seconds', 'Device'];\nvar SUM_HEAD = ['Student', 'Class', 'Activity', 'Code', 'Games finished', 'Which games', 'Stars', 'Best challenge score', 'Certificate', 'First seen', 'Last active', 'Key', 'Data'];\nvar WHAT = { open: 'Opened the activity', game: 'Finished a game', challenge: 'Super Challenge', cert: 'Got the certificate', test: 'Test' };\n\nfunction doPost(e) {\n  var lock = LockService.getScriptLock();\n  lock.waitLock(25000);\n  try {\n    var body = JSON.parse((e && e.postData && e.postData.contents) || '[]');\n    var list = Array.isArray(body) ? body : [body];\n    var ss = SpreadsheetApp.getActiveSpreadsheet();\n    setup_(ss);\n    list.slice(0, 50).forEach(function (ev) { record_(ss, ev); });\n    return ContentService.createTextOutput('ok');\n  } catch (err) {\n    return ContentService.createTextOutput('error: ' + err);\n  } finally {\n    lock.releaseLock();\n  }\n}\n\nfunction doGet(e) {\n  var ss = SpreadsheetApp.getActiveSpreadsheet();\n  var msg = 'FLIPSEED tracking is working.';\n  var lock = LockService.getScriptLock();\n  lock.waitLock(25000);\n  try {\n    setup_(ss);\n    if (e && e.parameter && e.parameter.test) {\n      record_(ss, { type: 'test', name: 'Test student', cls: 'Test', code: 'test', title: 'Test from the teacher', dev: 'teacher' });\n      msg += ' A test row was added to your sheet.';\n    }\n  } finally {\n    lock.releaseLock();\n  }\n  var html = '<div style=\"font-family:Arial,sans-serif;padding:24px;max-width:540px\">' +\n    '<h2 style=\"color:#23864f\">&#10004; ' + msg + '</h2>' +\n    '<p><a href=\"' + ss.getUrl() + '\" target=\"_blank\" style=\"font-size:18px\">Open your FLIPSEED results sheet</a></p></div>';\n  return HtmlService.createHtmlOutput(html).setTitle('FLIPSEED tracking');\n}\n\nfunction clean_(v, n) {\n  v = String(v == null ? '' : v).replace(/[\\u0000-\\u001f]/g, ' ').replace(/\\s+/g, ' ').trim().slice(0, n || 80);\n  return /^[=+\\-@]/.test(v) ? \"'\" + v : v;\n}\n\nfunction num_(v) {\n  v = Number(v);\n  return isFinite(v) ? v : '';\n}\n\nfunction record_(ss, ev) {\n  if (!ev || !ev.name || !ev.code) return;\n  var now = new Date();\n  var name = clean_(ev.name, 40), cls = clean_(ev.cls, 20), code = clean_(ev.code, 10);\n  var title = clean_(ev.title, 80), dev = clean_(ev.dev, 40), game = clean_(ev.game, 40);\n  var type = WHAT[ev.type] ? ev.type : 'game';\n\n  ss.getSheetByName(LOG).appendRow([now, name, cls, title, code, WHAT[type], game,\n    num_(ev.stars), num_(ev.mistakes), num_(ev.hints), num_(ev.score), num_(ev.secs), dev]);\n  if (type === 'test') return;\n\n  var sh = ss.getSheetByName(SUM);\n  var key = (name.toLowerCase() + '|' + cls.toLowerCase() + '|' + code.toLowerCase()).slice(0, 120);\n  var keyCol = SUM_HEAD.indexOf('Key') + 1;\n  var rows = Math.max(1, sh.getLastRow() - 1);\n  var found = sh.getRange(2, keyCol, rows, 1).createTextFinder(key).matchEntireCell(true).findNext();\n  var row, data;\n  if (found) {\n    row = found.getRow();\n    try { data = JSON.parse(sh.getRange(row, keyCol + 1).getValue() || '{}'); } catch (x) { data = {}; }\n  } else {\n    row = sh.getLastRow() + 1;\n    data = {};\n  }\n  data.games = data.games || {};\n  data.first = data.first || now.toISOString();\n  if (type === 'game' && game) data.games[game] = Math.max(data.games[game] || 0, Number(ev.stars) || 0);\n  if (type === 'challenge') data.best = Math.max(data.best || 0, Number(ev.score) || 0);\n  if (type === 'cert') data.cert = true;\n\n  var names = Object.keys(data.games);\n  var stars = names.reduce(function (s, k) { return s + (data.games[k] || 0); }, 0);\n  sh.getRange(row, 1, 1, SUM_HEAD.length).setValues([[\n    name, cls, title, code, names.length, names.join(', '), stars,\n    data.best || '', data.cert ? 'Yes' : '', new Date(data.first), now, key, JSON.stringify(data)\n  ]]);\n}\n\nfunction setup_(ss) {\n  var log = ss.getSheetByName(LOG);\n  if (!log) {\n    var first = ss.getSheets()[0];\n    log = (ss.getSheets().length === 1 && first.getLastRow() === 0) ? first.setName(LOG) : ss.insertSheet(LOG);\n    head_(log, LOG_HEAD);\n    log.getRange('A:A').setNumberFormat('dd/mm/yyyy hh:mm');\n  }\n  var sum = ss.getSheetByName(SUM);\n  if (!sum) {\n    sum = ss.insertSheet(SUM, 0);\n    head_(sum, SUM_HEAD);\n    sum.getRange('J:K').setNumberFormat('dd/mm/yyyy hh:mm');\n    sum.hideColumns(SUM_HEAD.indexOf('Key') + 1, 2);\n  }\n}\n\nfunction head_(sh, cols) {\n  sh.getRange(1, 1, 1, cols.length).setValues([cols])\n    .setFontWeight('bold').setBackground('#23864f').setFontColor('#ffffff');\n  sh.setFrozenRows(1);\n}\n";
+function student(){ try { var s = JSON.parse(lsGet('fs:student')); return s && s.name ? s : null; } catch(e){ return null; } }
+function devId(){ var d = lsGet('fs:dev'); if (!d) { d = Math.random().toString(36).slice(2,10) + Date.now().toString(36).slice(-4); lsSet('fs:dev', d); } return d; }
+function trackUrl(){ var u = DATA.settings && DATA.settings.track; return (u && /^https:\/\/script\.google\.com\/macros\/s\/[^\s]+\/exec$/.test(u)) ? u : ''; }
+function track(a, type, extra){
+  if (IS_TEACHER || PREVIEW || !a || !trackUrl()) return;
+  var st = student(); if (!st) return;
+  var ev = {type:type, name:st.name, cls:st.cls||'', code:a.code, title:a.title, dev:devId(), t:Date.now()};
+  if (extra) Object.keys(extra).forEach(function(k){ ev[k] = extra[k]; });
+  var q = []; try { q = JSON.parse(lsGet('fs:q')) || []; } catch(e){}
+  q.push(ev); if (q.length > 200) q = q.slice(-200);
+  lsSet('fs:q', JSON.stringify(q));
+  flushTrack();
+}
+var flushing = false;
+function flushTrack(){
+  var url = trackUrl(); if (!url || flushing) return;
+  var q = []; try { q = JSON.parse(lsGet('fs:q')) || []; } catch(e){}
+  if (!q.length) return;
+  var batch = q.slice(0, 40), body = JSON.stringify(batch);
+  flushing = true;
+  try {
+    fetch(url, {method:'POST', mode:'no-cors', keepalive: body.length < 60000, headers:{'Content-Type':'text/plain;charset=utf-8'}, body:body})
+      .then(function(){
+        var cur = []; try { cur = JSON.parse(lsGet('fs:q')) || []; } catch(e){}
+        var sent = {}; batch.forEach(function(e){ sent[e.t+'|'+e.type+'|'+(e.game||'')] = 1; });
+        cur = cur.filter(function(e){ return !sent[e.t+'|'+e.type+'|'+(e.game||'')]; });
+        lsSet('fs:q', JSON.stringify(cur)); flushing = false;
+        if (cur.length) setTimeout(flushTrack, 500);
+      }, function(){ flushing = false; });
+  } catch(e){ flushing = false; }
+}
+window.addEventListener('online', flushTrack);
 function render(){
   $app.textContent = '';
   var w = h('div',{class:'wrap'}); $app.append(w);
   setTimeout(function(){ w.append(h('p',{class:'buildtag'}, BUILD)); }, 0);
   var V = {
-    home:sHome, hub:sHub, game:sGame, cert:sCert,
+    home:sHome, hub:sHub, game:sGame, cert:sCert, who:sNameGate,
     studio:tStudio, create:tCreate, edit:tEdit, share:tShare
   }[view.name] || sHome;
   if (!IS_TEACHER && ['studio','create','edit','share'].indexOf(view.name) >= 0) { view={name:'home'}; V=sHome; }
+  if (!IS_TEACHER && !PREVIEW && ['hub','game','cert'].indexOf(view.name) >= 0 && !student()) { view = {name:'who', next:view}; V = sNameGate; }
   V(w);
 }
 
 /* =========================================================
    STUDENT SIDE
    ========================================================= */
+function whoPill(){
+  var st = student(); if (!st || IS_TEACHER) return null;
+  return h('div',{class:'whopill'}, I('student'),
+    h('span',null, t('hi')+', ', h('b',null, st.name), st.cls ? ' · '+st.cls : ''),
+    h('button',{class:'btn ghost sm', onclick:function(){ go({name:'who', next:view}); }}, t('notyou')+' '+t('change')));
+}
+function sNameGate(w){
+  w.append(topBar(true));
+  var st = student() || {};
+  var classes = (DATA.settings && DATA.settings.classes) || [];
+  var nameIn = h('input',{class:'inp big-inp', id:'st-name', autocomplete:'off', maxlength:'40', value:st.name||'', placeholder:t('egName')});
+  var clsIn = classes.length
+    ? h('select',{class:'inp', id:'st-class', style:'font-size:1.2rem;font-weight:800'}, h('option',{value:''}, t('chooseClass')), classes.map(function(c){ return h('option',{value:c, selected:st.cls===c}, c); }))
+    : h('input',{class:'inp', id:'st-class', maxlength:'20', autocomplete:'off', value:st.cls||'', placeholder:t('egClass'), style:'font-size:1.2rem;font-weight:800'});
+  var msg = h('p',{class:'small', 'aria-live':'polite', style:'min-height:1.3em;color:var(--coral);font-weight:800;text-align:center'});
+  function ok(n){ try { return new RegExp('^\\p{L}[\\p{L}\\p{M} .\'-]{1,39}$','u').test(n); } catch(e){ return n.length >= 2; } }
+  w.append(h('form',{class:'who clay', onsubmit:function(e){
+      e.preventDefault();
+      var n = nameIn.value.trim().replace(/\s+/g,' '), c = String(clsIn.value||'').trim().replace(/\s+/g,' ');
+      if (!ok(n)) { msg.textContent = t('needName'); nameIn.focus(); return; }
+      if (classes.length && !c) { msg.textContent = t('needClass'); clsIn.focus(); return; }
+      lsSet('fs:student', JSON.stringify({name:n, cls:c})); lsSet('fs:name', n);
+      playEv('ok');
+      var nx = view.next && view.next.name !== 'who' ? view.next : {name:'home'};
+      go(nx);
+    }},
+    h('div',{class:'who-art', 'aria-hidden':'true'}, I('student','w1'), I('sparkles','w2'), I('sprout','w3')),
+    h('h1',{class:'t3d', style:'text-align:center'}, t('whoName')),
+    h('p',{class:'muted', style:'text-align:center;font-weight:700;max-width:36ch;margin:0 auto'}, t('whoSub')),
+    h('div',{class:'field'}, h('label',{for:'st-name'}, t('yourname')), nameIn),
+    h('div',{class:'field'}, h('label',{for:'st-class'}, t('class')), clsIn),
+    msg,
+    h('button',{class:'btn sun', type:'submit', style:'align-self:center;min-width:220px;font-size:1.2rem'}, I('rocket'), t('letsgo')),
+    h('p',{class:'small muted', style:'text-align:center'}, t('privacy'))));
+  setTimeout(function(){ try { nameIn.focus(); } catch(e){} }, 60);
+}
 function sHome(w){
   w.append(topBar(true));
   var pub = DATA.activities.filter(function(a){return a.status==='published'}).sort(function(a,b){return (b.updated||0)-(a.updated||0)});
@@ -820,6 +898,7 @@ function sHome(w){
     h('div',{class:'hero-txt'}, h('div',{class:'row', style:'gap:6px'}, I('sparkles'), h('span',{class:'eyebrow'}, LANG==='vi'?'Học trước, hiểu sâu hơn':'Learn first, understand more')), h('h1',{class:'t3d'},t('choose')), h('p',{style:'font-size:1.1rem;font-weight:700', class:'muted'},t('hello'))),
     h('div',{class:'hero-logo'}, h('img',{src:ICONS.logo, alt:'FLIPSEED logo'}))
   ));
+  var pill = whoPill(); if (pill) w.append(pill);
   var codeIn = h('input',{class:'inp', id:'s-code', placeholder:'abcd', maxlength:'6', autocomplete:'off', style:'max-width:140px;text-transform:lowercase'});
   var msg = h('span',{class:'small muted', 'aria-live':'polite'});
   w.append(h('form',{class:'row clay', style:'margin:22px 0;padding:12px 16px;border-radius:20px', onsubmit:function(e){ e.preventDefault(); var a=findByCode(codeIn.value); if (a) go({name:'hub', id:a.id}); else msg.textContent=t('notfound'); }},
@@ -848,6 +927,8 @@ function sHub(w){
       h('h1',{class:'t3d'},a.title),
       h('p',{class:'muted'}, st===3 ? t('grown') : t('ready')))
   ));
+  var pill = whoPill(); if (pill) w.append(pill);
+  if (!ssGet('fs:open:'+a.code)) { ssSet('fs:open:'+a.code, '1'); track(a, 'open'); }
   var grid = h('div',{class:'games', style:'margin-top:20px'});
   gs.forEach(function(g, i){
     var s = p[g.k]||0;
@@ -881,13 +962,15 @@ function sCert(w){
   w.append(topBar(true));
   var p = prog(a.code), gs = enabledGames(a);
   var stars = gs.reduce(function(s,g){return s+(p[g.k]||0)},0);
+  var stu = student();
   var nameIn = h('input',{class:'inp', id:'c-name', placeholder:t('yourname'), value:lsGet('fs:name')||'', oninput:function(){ lsSet('fs:name', nameIn.value); nm.textContent = nameIn.value || '…'; }});
-  var nm = h('div',{class:'nm'}, lsGet('fs:name') || '…');
-  w.append(h('div',{class:'field', style:'max-width:320px;margin:0 auto 16px'}, h('label',{for:'c-name'},t('yourname')), nameIn));
+  var nm = h('div',{class:'nm'}, stu ? stu.name : (lsGet('fs:name') || '…'));
+  if (!stu) w.append(h('div',{class:'field', style:'max-width:320px;margin:0 auto 16px'}, h('label',{for:'c-name'},t('yourname')), nameIn));
+  if (!ssGet('fs:cert:'+a.code)) { ssSet('fs:cert:'+a.code, '1'); track(a, 'cert', {stars:stars}); }
   w.append(h('div',{class:'cert'},
     I('medal','medal'),
     h('img',{class:'cert-logo', src:ICONS.logo, alt:'FLIPSEED'}),
-    nm, h('h2',null,t('certTitle')),
+    nm, stu && stu.cls ? h('div',{class:'muted', style:'font-weight:800'}, t('class')+' '+stu.cls) : null, h('h2',null,t('certTitle')),
     h('p',{class:'fc-mean'}, a.title),
     h('div',{class:'row', style:'justify-content:center;font-family:var(--f-display);font-weight:800;font-size:1.6rem'}, I('glow'), '× '+stars, growth(3,'sm')),
     h('p',{class:'small muted'}, new Date().toLocaleDateString(LANG==='vi'?'vi-VN':'en-GB',{day:'numeric',month:'long',year:'numeric'})),
@@ -913,6 +996,7 @@ function sGame(w){
   head.insertBefore(hintBtn, head.lastChild);
   w.append(head);
   var stage = h('div',{class:'stack'}); w.append(stage);
+  var t0 = Date.now();
   var api = {
     a:a, el:stage, mistakes:0, hints:0, hint:null,
     setHint:function(fn){ api.hint = fn; hintBtn.hidden = !fn; },
@@ -922,6 +1006,7 @@ function sGame(w){
       var m = api.mistakes + Math.floor(api.hints/2), st = m===0?3:m<=2?2:1;
       if (g.k==='flash') st = 3;
       saveProg(a.code, g.k, st);
+      track(a, 'game', {game:g.en, stars:st, mistakes:api.mistakes, hints:api.hints, secs:Math.round((Date.now()-t0)/1000)});
       stage.textContent=''; playEv(st===3 && g.k!=='flash' ? 'great' : 'done'); confetti();
       var gs = enabledGames(a), idx = gs.findIndex(function(x){return x.k===g.k}), nx = gs[idx+1];
       stage.append(h('div',{class:'done-box'},
@@ -1338,6 +1423,7 @@ function gChallenge(api){
     if (isBest) lsSet('fs:best:'+a.code, String(score));
     var st = right >= words.length ? 3 : right >= Math.ceil(words.length/2) ? 2 : right >= 1 ? 1 : 0;
     if (st) saveProg(a.code, 'challenge', st);
+    track(a, 'challenge', {game:'Super Challenge', score:score, stars:st, mistakes:Math.max(0, answered-right), secs:TOTAL});
     api.el.textContent=''; if (isBest && score) playEv('great'); else if (right) playEv('done'); if (right) confetti();
     api.el.append(h('div',{class:'done-box'},
       I('trophy','medal'),
@@ -1432,6 +1518,40 @@ function tStudio(w){
       confirmBox
     ));
   });
+  // student names & tracking
+  var trackIn = h('input',{class:'inp', id:'track-url', placeholder:'https://script.google.com/macros/s/…/exec', value:(DATA.settings && DATA.settings.track)||''});
+  var classIn = h('input',{class:'inp', id:'class-list', placeholder:'e.g. 3A, 3B, 8C', value:((DATA.settings && DATA.settings.classes)||[]).join(', ')});
+  var codeBox = h('textarea',{class:'inp', id:'track-code', readOnly:true, style:'min-height:140px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.78rem', 'aria-label':'Tracking code'});
+  codeBox.value = TRACK_CODE;
+  var tUrl = trackUrl();
+  function tstep(n, title, body){ return h('div',{class:'step'}, h('span',{class:'stepn'}, n), h('div',{class:'stack', style:'gap:6px;min-width:0;flex:1'}, h('strong',null,title), body)); }
+  w.append(h('div',{class:'panel stack', style:'margin-top:28px'},
+    h('h3',{class:'row', style:'gap:8px'}, I('student'), 'Student names & tracking ', tUrl ? h('span',{class:'chip live'}, 'On') : h('span',{class:'chip draft'}, 'Not set up yet')),
+    h('p',{class:'small muted'}, 'Students now type their name and class before they play. Each time a student opens an activity, finishes a game, plays the Super Challenge or gets the certificate, FLIPSEED adds a row to a Google Sheet that only you can see. The "Students" tab shows one line per student with their games, stars and certificate.'),
+    tstep('1', 'Your classes', h('div',{class:'stack', style:'gap:6px'}, classIn, h('span',{class:'small muted'}, 'Separate classes with commas. Students pick their class from this list, which keeps your sheet tidy. Leave it empty to let them type it.'))),
+    tUrl ? null : tstep('2', 'Create your results sheet', h('span',{class:'small'}, 'Open ', h('a',{href:'https://sheets.new', target:'_blank', rel:'noopener'}, 'sheets.new'), ' (a new Google Sheet) and name it FLIPSEED Results. Then click Extensions → Apps Script.')),
+    tUrl ? null : tstep('3', 'Paste the tracking code', h('div',{class:'stack', style:'gap:6px'},
+      h('div',{class:'row'}, h('button',{class:'btn primary sm', onclick:function(){ copyText(TRACK_CODE, codeBox, 'Code copied. Paste it into Apps Script.'); }}, I('memo'), 'Copy the code')),
+      h('span',{class:'small'}, 'In Apps Script, delete everything in the editor, paste the code, and click Save (the disk icon).'),
+      h('details',null, h('summary',{class:'small', style:'cursor:pointer;font-weight:800'}, 'Show the code'), codeBox))),
+    tUrl ? null : tstep('4', 'Publish it as a web app', h('div',{class:'stack', style:'gap:4px'},
+      h('span',{class:'small'}, 'Click Deploy → New deployment. Click the gear ⚙ next to "Select type" and choose Web app.'),
+      h('span',{class:'small'}, 'Set Execute as: Me, and Who has access: Anyone. Click Deploy, then Authorize access and pick your Google account.'),
+      h('span',{class:'small muted'}, 'If Google says the app isn\'t verified, click Advanced → Go to (your project) (unsafe). It is safe: it\'s your own code.'),
+      h('span',{class:'small'}, 'Copy the Web app URL. It ends in /exec.'))),
+    tstep(tUrl ? '2' : '5', tUrl ? 'Your web app address' : 'Paste the Web app URL here', trackIn),
+    tUrl ? h('div',{class:'row'},
+      h('a',{class:'btn sm', href:tUrl+'?test=1', target:'_blank', rel:'noopener'}, I('check'), 'Send a test row'),
+      h('a',{class:'btn sm', href:tUrl, target:'_blank', rel:'noopener'}, I('books'), 'Open my results')) : null,
+    h('div',{class:'row'}, h('button',{class:'btn primary sm', onclick:function(){
+      var u = trackIn.value.trim();
+      if (u && !/^https:\/\/script\.google\.com\/macros\/s\/[^\s]+\/exec$/.test(u)) { toast('That address should start with https://script.google.com/macros/s/ and end with /exec', 5000); return; }
+      DATA.settings.track = u;
+      DATA.settings.classes = classIn.value.split(',').map(function(x){ return x.trim(); }).filter(Boolean).slice(0, 30);
+      savePage({name:'studio'}, 'Tracking settings saved');
+    }}, I('save'), 'Save tracking settings')),
+    h('p',{class:'note small'}, 'Results come from your student website. After you save, the website picks up these settings within the hour. Names are only sent to your own Google Sheet.')));
+
   // sound effects
   var sfxPanel = h('div',{class:'panel stack', style:'margin-top:28px'},
     h('h3',{class:'row', style:'gap:8px'}, I('speaker'), 'Sound effects'),
@@ -1877,6 +1997,10 @@ function tShare(w){
   w.append(h('div',{class:'panel', style:'display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start'}, h('div',{style:'flex:1;min-width:240px'}, left), link ? qrBox : null));
   if (link) loadScript(LIBS.qr).then(function(){ try { new window.QRCode(qrBox, {text:link, width:200, height:200, correctLevel:window.QRCode.CorrectLevel.M}); } catch(e){ qrBox.remove(); } }).catch(function(){ qrBox.remove(); });
 }
+function copyText(text, box, ok){
+  try { navigator.clipboard.writeText(text).then(function(){ toast(ok || 'Copied'); }, function(){ box.closest('details') && (box.closest('details').open = true); box.select(); toast('Press Ctrl+C to copy'); }); }
+  catch(e){ box.closest('details') && (box.closest('details').open = true); box.select(); toast('Press Ctrl+C to copy'); }
+}
 function copy(text, inp, ok){
   try { navigator.clipboard.writeText(text).then(function(){ toast(ok || 'Copied'); }, function(){ inp.select(); toast('Press Ctrl+C to copy'); }); }
   catch(e){ inp.select(); toast('Press Ctrl+C to copy'); }
@@ -1938,6 +2062,7 @@ function routeFromHash(){
   var a = c && findByCode(c);
   return a ? {name:'hub', id:a.id} : null;
 }
+setTimeout(flushTrack, 1500);
 var start = routeFromHash() || (DATA.standalone && DATA.activities[0] ? {name:'hub', id:DATA.activities[0].id} : null);
 if (start) view = start;
 render();
@@ -1960,4 +2085,5 @@ window.addEventListener('hashchange', function(){ var r = routeFromHash(); if (r
 })();
 })();
 </script>
+
 </body></html>
