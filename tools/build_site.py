@@ -9,8 +9,7 @@ m = re.search(r'(<script id="fs-data" type="application/json">)(.*?)(</script>)'
 data = json.loads(m.group(2))
 data['activities'] = [a for a in data.get('activities', []) if a.get('status') == 'published']
 old = data.get('settings') or {}
-data['settings'] = {'link': SITE}
-if old.get('sfx'): data['settings']['sfx'] = old['sfx']  # keep the teacher's sound choices
+data['settings'] = dict(old, link=SITE)  # keep the teacher's choices (sounds, classes, tracking address)
 data['site'] = True
 js = json.dumps(data, ensure_ascii=False, separators=(',', ':')).replace('<', '\\u003c')
 html = html[:m.start(2)] + js + html[m.end(2):]
