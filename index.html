@@ -820,7 +820,7 @@ function topBar(student){
 
 /* ---------- routing ---------- */
 function go(v){ if (['studio','create','share','edit'].indexOf(v.name)>=0) PREVIEW = null; view = v; if (window.speechSynthesis) try{speechSynthesis.cancel()}catch(e){}; render(); window.scrollTo(0,0); }
-var BUILD = 'Update 23 Oct · instant website update';
+var BUILD = 'Update 23 Oct · links wait for new lessons';
 var TRACK_CODE = "/* FLIPSEED student tracking\n   Paste this into your Google Sheet: Extensions \u2192 Apps Script.\n   Then Deploy \u2192 New deployment \u2192 Web app (Execute as: Me, Who has access: Anyone).\n\n   TEACHER KEY: you type this key on your website's Results page (\u2026/flipseed/#results).\n   Keep it private. Only someone with this key can see student results. */\nvar TEACHER_KEY = '__TEACHER_KEY__';\n\nvar LOG = 'Activity log';\nvar SUM = 'Students';\nvar LOG_HEAD = ['Time', 'Student', 'Class', 'Activity', 'Code', 'What happened', 'Game', 'Stars', 'Mistakes', 'Hints used', 'Score', 'Seconds', 'Device'];\nvar SUM_HEAD = ['Student', 'Class', 'Activity', 'Code', 'Games finished', 'Which games', 'Stars', 'Best challenge score', 'Certificate', 'First seen', 'Last active', 'Key', 'Data'];\nvar WHAT = { open: 'Opened the activity', game: 'Finished a game', challenge: 'Super Challenge', cert: 'Got the certificate', test: 'Test' };\n\nfunction doPost(e) {\n  var lock = LockService.getScriptLock();\n  lock.waitLock(25000);\n  try {\n    var body = JSON.parse((e && e.postData && e.postData.contents) || '[]');\n    var list = Array.isArray(body) ? body : [body];\n    var ss = SpreadsheetApp.getActiveSpreadsheet();\n    setup_(ss);\n    list.slice(0, 50).forEach(function (ev) { record_(ss, ev); });\n    return ContentService.createTextOutput('ok');\n  } catch (err) {\n    return ContentService.createTextOutput('error: ' + err);\n  } finally {\n    lock.releaseLock();\n  }\n}\n\nfunction doGet(e) {\n  if (e && e.parameter && e.parameter.action === 'results') return results_(e.parameter);\n  var ss = SpreadsheetApp.getActiveSpreadsheet();\n  var msg = 'FLIPSEED tracking is working.';\n  var lock = LockService.getScriptLock();\n  lock.waitLock(25000);\n  try {\n    setup_(ss);\n    if (e && e.parameter && e.parameter.test) {\n      record_(ss, { type: 'test', name: 'Test student', cls: 'Test', code: 'test', title: 'Test from the teacher', dev: 'teacher' });\n      msg += ' A test row was added to your sheet.';\n    }\n  } finally {\n    lock.releaseLock();\n  }\n  var html = '<div style=\"font-family:Arial,sans-serif;padding:24px;max-width:540px\">' +\n    '<h2 style=\"color:#23864f\">&#10004; ' + msg + '</h2>' +\n    '<p><a href=\"' + ss.getUrl() + '\" target=\"_blank\" style=\"font-size:18px\">Open your FLIPSEED results sheet</a></p></div>';\n  return HtmlService.createHtmlOutput(html).setTitle('FLIPSEED tracking');\n}\n\nfunction results_(p) {\n  var out;\n  if (!TEACHER_KEY || TEACHER_KEY.indexOf('__') === 0 || String(p.key || '') !== TEACHER_KEY) {\n    out = { ok: false, error: 'key' };\n  } else {\n    var ss = SpreadsheetApp.getActiveSpreadsheet();\n    setup_(ss);\n    var sum = ss.getSheetByName(SUM), log = ss.getSheetByName(LOG);\n    var students = [], events = [];\n    if (sum.getLastRow() > 1) {\n      sum.getRange(2, 1, sum.getLastRow() - 1, SUM_HEAD.length).getValues().forEach(function (r) {\n        var d = {}; try { d = JSON.parse(r[12] || '{}'); } catch (x) {}\n        students.push({ name: r[0], cls: r[1], title: r[2], code: r[3], games: d.games || {}, stars: r[6],\n          best: r[7], cert: r[8] === 'Yes', first: iso_(r[9]), last: iso_(r[10]) });\n      });\n    }\n    var n = log.getLastRow() - 1;\n    if (n > 0) {\n      var take = Math.min(n, 2000);\n      log.getRange(log.getLastRow() - take + 1, 1, take, LOG_HEAD.length).getValues().forEach(function (r) {\n        events.push({ time: iso_(r[0]), name: r[1], cls: r[2], title: r[3], code: r[4], what: r[5], game: r[6],\n          stars: r[7], mistakes: r[8], hints: r[9], score: r[10], secs: r[11] });\n      });\n    }\n    out = { ok: true, sheet: ss.getUrl(), now: new Date().toISOString(), students: students, events: events };\n  }\n  var json = JSON.stringify(out);\n  if (p.callback && /^[A-Za-z_$][\\w$]{0,40}$/.test(p.callback)) {\n    return ContentService.createTextOutput(p.callback + '(' + json + ')').setMimeType(ContentService.MimeType.JAVASCRIPT);\n  }\n  return ContentService.createTextOutput(json).setMimeType(ContentService.MimeType.JSON);\n}\n\nfunction iso_(v) {\n  return v instanceof Date ? v.toISOString() : (v ? String(v) : '');\n}\n\nfunction clean_(v, n) {\n  v = String(v == null ? '' : v).replace(/[\\u0000-\\u001f]/g, ' ').replace(/\\s+/g, ' ').trim().slice(0, n || 80);\n  return /^[=+\\-@]/.test(v) ? \"'\" + v : v;\n}\n\nfunction num_(v) {\n  v = Number(v);\n  return isFinite(v) ? v : '';\n}\n\nfunction record_(ss, ev) {\n  if (!ev || !ev.name || !ev.code) return;\n  var now = new Date();\n  var name = clean_(ev.name, 40), cls = clean_(ev.cls, 20), code = clean_(ev.code, 10);\n  var title = clean_(ev.title, 80), dev = clean_(ev.dev, 40), game = clean_(ev.game, 40);\n  var type = WHAT[ev.type] ? ev.type : 'game';\n\n  ss.getSheetByName(LOG).appendRow([now, name, cls, title, code, WHAT[type], game,\n    num_(ev.stars), num_(ev.mistakes), num_(ev.hints), num_(ev.score), num_(ev.secs), dev]);\n  if (type === 'test') return;\n\n  var sh = ss.getSheetByName(SUM);\n  var key = (name.toLowerCase() + '|' + cls.toLowerCase() + '|' + code.toLowerCase()).slice(0, 120);\n  var keyCol = SUM_HEAD.indexOf('Key') + 1;\n  var rows = Math.max(1, sh.getLastRow() - 1);\n  var found = sh.getRange(2, keyCol, rows, 1).createTextFinder(key).matchEntireCell(true).findNext();\n  var row, data;\n  if (found) {\n    row = found.getRow();\n    try { data = JSON.parse(sh.getRange(row, keyCol + 1).getValue() || '{}'); } catch (x) { data = {}; }\n  } else {\n    row = sh.getLastRow() + 1;\n    data = {};\n  }\n  data.games = data.games || {};\n  data.first = data.first || now.toISOString();\n  if (type === 'game' && game) data.games[game] = Math.max(data.games[game] || 0, Number(ev.stars) || 0);\n  if (type === 'challenge') data.best = Math.max(data.best || 0, Number(ev.score) || 0);\n  if (type === 'cert') data.cert = true;\n\n  var names = Object.keys(data.games);\n  var stars = names.reduce(function (s, k) { return s + (data.games[k] || 0); }, 0);\n  sh.getRange(row, 1, 1, SUM_HEAD.length).setValues([[\n    name, cls, title, code, names.length, names.join(', '), stars,\n    data.best || '', data.cert ? 'Yes' : '', new Date(data.first), now, key, JSON.stringify(data)\n  ]]);\n}\n\nfunction setup_(ss) {\n  var log = ss.getSheetByName(LOG);\n  if (!log) {\n    var first = ss.getSheets()[0];\n    log = (ss.getSheets().length === 1 && first.getLastRow() === 0) ? first.setName(LOG) : ss.insertSheet(LOG);\n    head_(log, LOG_HEAD);\n    log.getRange('A:A').setNumberFormat('dd/mm/yyyy hh:mm');\n  }\n  var sum = ss.getSheetByName(SUM);\n  if (!sum) {\n    sum = ss.insertSheet(SUM, 0);\n    head_(sum, SUM_HEAD);\n    sum.getRange('J:K').setNumberFormat('dd/mm/yyyy hh:mm');\n    sum.hideColumns(SUM_HEAD.indexOf('Key') + 1, 2);\n  }\n}\n\nfunction head_(sh, cols) {\n  sh.getRange(1, 1, 1, cols.length).setValues([cols])\n    .setFontWeight('bold').setBackground('#23864f').setFontColor('#ffffff');\n  sh.setFrozenRows(1);\n}\n";
 function student(){ try { var s = JSON.parse(lsGet('fs:student')); return s && s.name ? s : null; } catch(e){ return null; } }
 function devId(){ var d = lsGet('fs:dev'); if (!d) { d = Math.random().toString(36).slice(2,10) + Date.now().toString(36).slice(-4); lsSet('fs:dev', d); } return d; }
@@ -1018,6 +1018,52 @@ function render(){
 /* =========================================================
    STUDENT SIDE
    ========================================================= */
+/* A link can be opened before the website has the new lesson (or the phone shows an old copy).
+   Instead of failing, fetch the newest copy of the website and open the lesson as soon as it is there. */
+var DATA_RE = new RegExp('<script id="fs-data" type="application/json">([\\s\\S]*?)<' + '/script>');
+function fetchLatestData(){
+  var url = location.pathname + '?fresh=' + Date.now();
+  return fetch(url, {cache:'no-store'}).then(function(r){ return r.ok ? r.text() : ''; }).then(function(t){
+    var m = t && t.match(DATA_RE); return m ? JSON.parse(m[1]) : null;
+  }).catch(function(){ return null; });
+}
+var waitTimer = null;
+function waitForLesson(w, code){
+  var started = Date.now(), tries = 0, LIMIT = 15*60*1000;
+  var vi = LANG === 'vi';
+  var status = h('p',{class:'small muted', 'aria-live':'polite', style:'text-align:center'}, vi ? 'Đang kiểm tra…' : 'Checking…');
+  var card = h('div',{class:'who clay', style:'text-align:center;align-items:center'},
+    growth(1),
+    h('h2',{class:'t3d'}, vi ? 'Bài học sắp sẵn sàng!' : 'Your lesson is almost ready!'),
+    h('p',{style:'font-weight:700;max-width:36ch'}, vi ? 'Thầy cô vừa tạo bài học này. Em chờ một chút nhé, bài học sẽ tự mở ra.' : 'Your teacher just made this lesson. Please wait a moment. It will open by itself.'),
+    h('div',{class:'progress', style:'justify-content:center'}, h('div',{class:'spin'}), h('span',null, vi ? 'Đang chuẩn bị bài học…' : 'Getting it ready…')),
+    status);
+  w.append(card);
+  clearTimeout(waitTimer);
+  function check(){
+    if (view.name !== 'home' || view.missing !== code) return;
+    tries++;
+    fetchLatestData().then(function(d){
+      if (view.name !== 'home' || view.missing !== code) return;
+      var a = d && (d.activities||[]).find(function(x){ return x.code === code && x.status === 'published'; });
+      if (a) {
+        DATA.activities = d.activities; if (d.settings) DATA.settings = d.settings;
+        playEv('ok'); go({name:'hub', id:a.id});
+        return;
+      }
+      if (Date.now() - started > LIMIT) {
+        card.textContent = '';
+        card.append(I('question','medal'), h('h2',null, vi ? 'Chưa tìm thấy bài học' : "We can't find this lesson yet"),
+          h('p',{style:'font-weight:700;max-width:36ch'}, vi ? 'Em hãy hỏi thầy cô xem đường link có đúng không nhé.' : 'Please ask your teacher to check the link.'),
+          h('button',{class:'btn sm', onclick:function(){ location.reload(); }}, I('rotr'), vi ? 'Thử lại' : 'Try again'));
+        return;
+      }
+      status.textContent = (vi ? 'Sẽ kiểm tra lại sau vài giây… (lần ' : 'Checking again in a few seconds… (check ') + tries + ')';
+      waitTimer = setTimeout(check, tries < 4 ? 8000 : 15000);
+    });
+  }
+  check();
+}
 function whoPill(){
   var st = student(); if (!st || IS_TEACHER) return null;
   return h('div',{class:'whopill'}, I('student'),
@@ -1056,15 +1102,12 @@ function sNameGate(w){
 }
 function sHome(w){
   w.append(topBar(true));
+  if (view.missing) { waitForLesson(w, view.missing); return; }
   var pub = DATA.activities.filter(function(a){return a.status==='published'}).sort(function(a,b){return (b.updated||0)-(a.updated||0)});
   w.append(h('div',{class:'hero3d clay'},
     h('div',{class:'hero-txt'}, h('div',{class:'row', style:'gap:6px'}, I('sparkles'), h('span',{class:'eyebrow'}, LANG==='vi'?'Học trước, hiểu sâu hơn':'Learn first, understand more')), h('h1',{class:'t3d'},t('choose')), h('p',{style:'font-size:1.1rem;font-weight:700', class:'muted'},t('hello'))),
     h('div',{class:'hero-logo'}, h('img',{src:ICONS.logo, alt:'FLIPSEED logo'}))
   ));
-  if (view.missing) w.append(h('div',{class:'note warn', style:'margin-top:18px;font-weight:700'}, LANG==='vi'
-    ? 'Bài học có mã "'+view.missing.toUpperCase()+'" chưa sẵn sàng. Em hãy thử lại sau vài phút, hoặc hỏi thầy cô nhé.'
-    : 'The lesson with code "'+view.missing.toUpperCase()+'" is not ready yet. Please try again in a few minutes, or ask your teacher.',
-    ' ', h('button',{class:'btn sm', onclick:function(){ location.reload(); }}, I('rotr'), LANG==='vi'?'Thử lại':'Try again')));
   var pill = whoPill(); if (pill) w.append(pill);
   var codeIn = h('input',{class:'inp', id:'s-code', placeholder:'abcd', maxlength:'6', autocomplete:'off', style:'max-width:140px;text-transform:lowercase'});
   var msg = h('span',{class:'small muted', 'aria-live':'polite'});
@@ -1082,8 +1125,20 @@ function sHome(w){
     ));
   });
 }
+var freshChecked = {};
 function sHub(w){
   var a = findAct(view.id); if (!a) return go({name:'home'});
+  if (DATA.site && !freshChecked[a.code]) {
+    freshChecked[a.code] = 1;
+    var code = a.code, upd = a.updated || 0;
+    fetchLatestData().then(function(d){
+      var n = d && (d.activities||[]).find(function(x){ return x.code === code; });
+      if (n && (n.updated||0) > upd) {
+        DATA.activities = d.activities; if (d.settings) DATA.settings = d.settings;
+        if (view.name === 'hub') { var nn = findByCode(code); if (nn) go({name:'hub', id:nn.id}); }
+      }
+    });
+  }
   w.append(topBar(true));
   var gs = enabledGames(a), p = prog(a.code), st = stageOf(a);
   if (PREVIEW && PREVIEW.id===a.id) w.append(h('p',{class:'note warn', style:'margin-bottom:14px'}, 'Preview of your unsaved activity. ', h('button',{class:'btn sm', onclick:function(){ var d=PREVIEW; go({name:'edit', id:d.id, draft:d}); }}, '← Back to editing')));
@@ -1642,7 +1697,7 @@ function linkStrip(a, id){
     h('div',{class:'copyline'}, inp,
       h('button',{class:'btn sm primary', onclick:function(){ copy(l, inp, 'Link copied'); }}, I('link'), 'Copy link'),
       h('button',{class:'btn sm', onclick:function(){ copy(zaloMsg(a), inp, 'Message copied. Paste it in your Zalo group.'); }}, I('phone'), 'Copy Zalo message')),
-    isSiteLink() && syncingNow() && (a.updated||0) > (+(lsGet('fs:syncAt')||0)) - 120000 ? h('p',{class:'small', style:'margin-top:4px;font-weight:800;color:var(--sun-depth)'}, '⏳ Going live on your website in about 3 minutes. Send the link after that.') : null);
+    isSiteLink() && syncingNow() && (a.updated||0) > (+(lsGet('fs:syncAt')||0)) - 120000 ? h('p',{class:'small', style:'margin-top:4px;font-weight:800;color:var(--leaf)'}, '✓ You can send this link now. The website is updating (about 2 minutes). If a student opens it sooner, it waits and opens the lesson by itself.') : null);
 }
 function pageSize(){ return new Blob([buildHtml()]).size; }
 
