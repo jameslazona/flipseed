@@ -92,6 +92,20 @@ a{color:var(--sky)}
 @media (max-width:560px){.hero-logo{flex-basis:auto;width:min(230px,70%);margin:0 auto}}
 [hidden]{display:none!important}
 .linkstrip{margin-top:4px}
+.rfilters{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+.tablewrap{overflow-x:auto;padding:6px;border-radius:var(--r)}
+.rtable{width:100%;border-collapse:collapse;min-width:760px;font-size:.95rem}
+.rtable th{text-align:left;padding:10px 10px;font-size:.8rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;border-bottom:2px solid var(--line);white-space:nowrap}
+.rtable td{padding:10px;border-bottom:1px solid var(--line);vertical-align:middle}
+.rtable .ico{width:26px;height:26px}
+.sortbtn{border:0;background:none;font:inherit;color:inherit;text-transform:inherit;letter-spacing:inherit;cursor:pointer;padding:0}
+.sortbtn.on{color:var(--leaf)}
+.rrow{cursor:pointer}
+.rrow:hover td,.rrow.open td{background:var(--surface-2)}
+.rdetail td{background:var(--surface-2);padding:6px 14px 14px}
+.tl{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px;font-size:.9rem}
+.pbar{height:10px;width:110px;border-radius:99px;background:var(--surface-2);box-shadow:inset 0 2px 4px -2px var(--drop);overflow:hidden;margin-bottom:3px}
+.pbar i{display:block;height:100%;border-radius:99px;background:linear-gradient(180deg,var(--leaf-hi),var(--leaf))}
 .who{max-width:520px;margin:10px auto 0;padding:26px 22px;display:flex;flex-direction:column;gap:14px}
 .who-art{position:relative;height:96px;display:grid;place-items:center}
 .who-art .w1{width:88px;height:88px;animation:bob 3.4s ease-in-out infinite}
@@ -805,8 +819,8 @@ function topBar(student){
 
 /* ---------- routing ---------- */
 function go(v){ if (['studio','create','share','edit'].indexOf(v.name)>=0) PREVIEW = null; view = v; if (window.speechSynthesis) try{speechSynthesis.cancel()}catch(e){}; render(); window.scrollTo(0,0); }
-var BUILD = 'Update 23 Oct · student names & tracking';
-var TRACK_CODE = "/* FLIPSEED student tracking\n   Paste this into your Google Sheet: Extensions \u2192 Apps Script.\n   Then Deploy \u2192 New deployment \u2192 Web app (Execute as: Me, Who has access: Anyone). */\n\nvar LOG = 'Activity log';\nvar SUM = 'Students';\nvar LOG_HEAD = ['Time', 'Student', 'Class', 'Activity', 'Code', 'What happened', 'Game', 'Stars', 'Mistakes', 'Hints used', 'Score', 'Seconds', 'Device'];\nvar SUM_HEAD = ['Student', 'Class', 'Activity', 'Code', 'Games finished', 'Which games', 'Stars', 'Best challenge score', 'Certificate', 'First seen', 'Last active', 'Key', 'Data'];\nvar WHAT = { open: 'Opened the activity', game: 'Finished a game', challenge: 'Super Challenge', cert: 'Got the certificate', test: 'Test' };\n\nfunction doPost(e) {\n  var lock = LockService.getScriptLock();\n  lock.waitLock(25000);\n  try {\n    var body = JSON.parse((e && e.postData && e.postData.contents) || '[]');\n    var list = Array.isArray(body) ? body : [body];\n    var ss = SpreadsheetApp.getActiveSpreadsheet();\n    setup_(ss);\n    list.slice(0, 50).forEach(function (ev) { record_(ss, ev); });\n    return ContentService.createTextOutput('ok');\n  } catch (err) {\n    return ContentService.createTextOutput('error: ' + err);\n  } finally {\n    lock.releaseLock();\n  }\n}\n\nfunction doGet(e) {\n  var ss = SpreadsheetApp.getActiveSpreadsheet();\n  var msg = 'FLIPSEED tracking is working.';\n  var lock = LockService.getScriptLock();\n  lock.waitLock(25000);\n  try {\n    setup_(ss);\n    if (e && e.parameter && e.parameter.test) {\n      record_(ss, { type: 'test', name: 'Test student', cls: 'Test', code: 'test', title: 'Test from the teacher', dev: 'teacher' });\n      msg += ' A test row was added to your sheet.';\n    }\n  } finally {\n    lock.releaseLock();\n  }\n  var html = '<div style=\"font-family:Arial,sans-serif;padding:24px;max-width:540px\">' +\n    '<h2 style=\"color:#23864f\">&#10004; ' + msg + '</h2>' +\n    '<p><a href=\"' + ss.getUrl() + '\" target=\"_blank\" style=\"font-size:18px\">Open your FLIPSEED results sheet</a></p></div>';\n  return HtmlService.createHtmlOutput(html).setTitle('FLIPSEED tracking');\n}\n\nfunction clean_(v, n) {\n  v = String(v == null ? '' : v).replace(/[\\u0000-\\u001f]/g, ' ').replace(/\\s+/g, ' ').trim().slice(0, n || 80);\n  return /^[=+\\-@]/.test(v) ? \"'\" + v : v;\n}\n\nfunction num_(v) {\n  v = Number(v);\n  return isFinite(v) ? v : '';\n}\n\nfunction record_(ss, ev) {\n  if (!ev || !ev.name || !ev.code) return;\n  var now = new Date();\n  var name = clean_(ev.name, 40), cls = clean_(ev.cls, 20), code = clean_(ev.code, 10);\n  var title = clean_(ev.title, 80), dev = clean_(ev.dev, 40), game = clean_(ev.game, 40);\n  var type = WHAT[ev.type] ? ev.type : 'game';\n\n  ss.getSheetByName(LOG).appendRow([now, name, cls, title, code, WHAT[type], game,\n    num_(ev.stars), num_(ev.mistakes), num_(ev.hints), num_(ev.score), num_(ev.secs), dev]);\n  if (type === 'test') return;\n\n  var sh = ss.getSheetByName(SUM);\n  var key = (name.toLowerCase() + '|' + cls.toLowerCase() + '|' + code.toLowerCase()).slice(0, 120);\n  var keyCol = SUM_HEAD.indexOf('Key') + 1;\n  var rows = Math.max(1, sh.getLastRow() - 1);\n  var found = sh.getRange(2, keyCol, rows, 1).createTextFinder(key).matchEntireCell(true).findNext();\n  var row, data;\n  if (found) {\n    row = found.getRow();\n    try { data = JSON.parse(sh.getRange(row, keyCol + 1).getValue() || '{}'); } catch (x) { data = {}; }\n  } else {\n    row = sh.getLastRow() + 1;\n    data = {};\n  }\n  data.games = data.games || {};\n  data.first = data.first || now.toISOString();\n  if (type === 'game' && game) data.games[game] = Math.max(data.games[game] || 0, Number(ev.stars) || 0);\n  if (type === 'challenge') data.best = Math.max(data.best || 0, Number(ev.score) || 0);\n  if (type === 'cert') data.cert = true;\n\n  var names = Object.keys(data.games);\n  var stars = names.reduce(function (s, k) { return s + (data.games[k] || 0); }, 0);\n  sh.getRange(row, 1, 1, SUM_HEAD.length).setValues([[\n    name, cls, title, code, names.length, names.join(', '), stars,\n    data.best || '', data.cert ? 'Yes' : '', new Date(data.first), now, key, JSON.stringify(data)\n  ]]);\n}\n\nfunction setup_(ss) {\n  var log = ss.getSheetByName(LOG);\n  if (!log) {\n    var first = ss.getSheets()[0];\n    log = (ss.getSheets().length === 1 && first.getLastRow() === 0) ? first.setName(LOG) : ss.insertSheet(LOG);\n    head_(log, LOG_HEAD);\n    log.getRange('A:A').setNumberFormat('dd/mm/yyyy hh:mm');\n  }\n  var sum = ss.getSheetByName(SUM);\n  if (!sum) {\n    sum = ss.insertSheet(SUM, 0);\n    head_(sum, SUM_HEAD);\n    sum.getRange('J:K').setNumberFormat('dd/mm/yyyy hh:mm');\n    sum.hideColumns(SUM_HEAD.indexOf('Key') + 1, 2);\n  }\n}\n\nfunction head_(sh, cols) {\n  sh.getRange(1, 1, 1, cols.length).setValues([cols])\n    .setFontWeight('bold').setBackground('#23864f').setFontColor('#ffffff');\n  sh.setFrozenRows(1);\n}\n";
+var BUILD = 'Update 23 Oct · results page';
+var TRACK_CODE = "/* FLIPSEED student tracking\n   Paste this into your Google Sheet: Extensions \u2192 Apps Script.\n   Then Deploy \u2192 New deployment \u2192 Web app (Execute as: Me, Who has access: Anyone).\n\n   TEACHER KEY: you type this key on your website's Results page (\u2026/flipseed/#results).\n   Keep it private. Only someone with this key can see student results. */\nvar TEACHER_KEY = '__TEACHER_KEY__';\n\nvar LOG = 'Activity log';\nvar SUM = 'Students';\nvar LOG_HEAD = ['Time', 'Student', 'Class', 'Activity', 'Code', 'What happened', 'Game', 'Stars', 'Mistakes', 'Hints used', 'Score', 'Seconds', 'Device'];\nvar SUM_HEAD = ['Student', 'Class', 'Activity', 'Code', 'Games finished', 'Which games', 'Stars', 'Best challenge score', 'Certificate', 'First seen', 'Last active', 'Key', 'Data'];\nvar WHAT = { open: 'Opened the activity', game: 'Finished a game', challenge: 'Super Challenge', cert: 'Got the certificate', test: 'Test' };\n\nfunction doPost(e) {\n  var lock = LockService.getScriptLock();\n  lock.waitLock(25000);\n  try {\n    var body = JSON.parse((e && e.postData && e.postData.contents) || '[]');\n    var list = Array.isArray(body) ? body : [body];\n    var ss = SpreadsheetApp.getActiveSpreadsheet();\n    setup_(ss);\n    list.slice(0, 50).forEach(function (ev) { record_(ss, ev); });\n    return ContentService.createTextOutput('ok');\n  } catch (err) {\n    return ContentService.createTextOutput('error: ' + err);\n  } finally {\n    lock.releaseLock();\n  }\n}\n\nfunction doGet(e) {\n  if (e && e.parameter && e.parameter.action === 'results') return results_(e.parameter);\n  var ss = SpreadsheetApp.getActiveSpreadsheet();\n  var msg = 'FLIPSEED tracking is working.';\n  var lock = LockService.getScriptLock();\n  lock.waitLock(25000);\n  try {\n    setup_(ss);\n    if (e && e.parameter && e.parameter.test) {\n      record_(ss, { type: 'test', name: 'Test student', cls: 'Test', code: 'test', title: 'Test from the teacher', dev: 'teacher' });\n      msg += ' A test row was added to your sheet.';\n    }\n  } finally {\n    lock.releaseLock();\n  }\n  var html = '<div style=\"font-family:Arial,sans-serif;padding:24px;max-width:540px\">' +\n    '<h2 style=\"color:#23864f\">&#10004; ' + msg + '</h2>' +\n    '<p><a href=\"' + ss.getUrl() + '\" target=\"_blank\" style=\"font-size:18px\">Open your FLIPSEED results sheet</a></p></div>';\n  return HtmlService.createHtmlOutput(html).setTitle('FLIPSEED tracking');\n}\n\nfunction results_(p) {\n  var out;\n  if (!TEACHER_KEY || TEACHER_KEY.indexOf('__') === 0 || String(p.key || '') !== TEACHER_KEY) {\n    out = { ok: false, error: 'key' };\n  } else {\n    var ss = SpreadsheetApp.getActiveSpreadsheet();\n    setup_(ss);\n    var sum = ss.getSheetByName(SUM), log = ss.getSheetByName(LOG);\n    var students = [], events = [];\n    if (sum.getLastRow() > 1) {\n      sum.getRange(2, 1, sum.getLastRow() - 1, SUM_HEAD.length).getValues().forEach(function (r) {\n        var d = {}; try { d = JSON.parse(r[12] || '{}'); } catch (x) {}\n        students.push({ name: r[0], cls: r[1], title: r[2], code: r[3], games: d.games || {}, stars: r[6],\n          best: r[7], cert: r[8] === 'Yes', first: iso_(r[9]), last: iso_(r[10]) });\n      });\n    }\n    var n = log.getLastRow() - 1;\n    if (n > 0) {\n      var take = Math.min(n, 2000);\n      log.getRange(log.getLastRow() - take + 1, 1, take, LOG_HEAD.length).getValues().forEach(function (r) {\n        events.push({ time: iso_(r[0]), name: r[1], cls: r[2], title: r[3], code: r[4], what: r[5], game: r[6],\n          stars: r[7], mistakes: r[8], hints: r[9], score: r[10], secs: r[11] });\n      });\n    }\n    out = { ok: true, sheet: ss.getUrl(), now: new Date().toISOString(), students: students, events: events };\n  }\n  var json = JSON.stringify(out);\n  if (p.callback && /^[A-Za-z_$][\\w$]{0,40}$/.test(p.callback)) {\n    return ContentService.createTextOutput(p.callback + '(' + json + ')').setMimeType(ContentService.MimeType.JAVASCRIPT);\n  }\n  return ContentService.createTextOutput(json).setMimeType(ContentService.MimeType.JSON);\n}\n\nfunction iso_(v) {\n  return v instanceof Date ? v.toISOString() : (v ? String(v) : '');\n}\n\nfunction clean_(v, n) {\n  v = String(v == null ? '' : v).replace(/[\\u0000-\\u001f]/g, ' ').replace(/\\s+/g, ' ').trim().slice(0, n || 80);\n  return /^[=+\\-@]/.test(v) ? \"'\" + v : v;\n}\n\nfunction num_(v) {\n  v = Number(v);\n  return isFinite(v) ? v : '';\n}\n\nfunction record_(ss, ev) {\n  if (!ev || !ev.name || !ev.code) return;\n  var now = new Date();\n  var name = clean_(ev.name, 40), cls = clean_(ev.cls, 20), code = clean_(ev.code, 10);\n  var title = clean_(ev.title, 80), dev = clean_(ev.dev, 40), game = clean_(ev.game, 40);\n  var type = WHAT[ev.type] ? ev.type : 'game';\n\n  ss.getSheetByName(LOG).appendRow([now, name, cls, title, code, WHAT[type], game,\n    num_(ev.stars), num_(ev.mistakes), num_(ev.hints), num_(ev.score), num_(ev.secs), dev]);\n  if (type === 'test') return;\n\n  var sh = ss.getSheetByName(SUM);\n  var key = (name.toLowerCase() + '|' + cls.toLowerCase() + '|' + code.toLowerCase()).slice(0, 120);\n  var keyCol = SUM_HEAD.indexOf('Key') + 1;\n  var rows = Math.max(1, sh.getLastRow() - 1);\n  var found = sh.getRange(2, keyCol, rows, 1).createTextFinder(key).matchEntireCell(true).findNext();\n  var row, data;\n  if (found) {\n    row = found.getRow();\n    try { data = JSON.parse(sh.getRange(row, keyCol + 1).getValue() || '{}'); } catch (x) { data = {}; }\n  } else {\n    row = sh.getLastRow() + 1;\n    data = {};\n  }\n  data.games = data.games || {};\n  data.first = data.first || now.toISOString();\n  if (type === 'game' && game) data.games[game] = Math.max(data.games[game] || 0, Number(ev.stars) || 0);\n  if (type === 'challenge') data.best = Math.max(data.best || 0, Number(ev.score) || 0);\n  if (type === 'cert') data.cert = true;\n\n  var names = Object.keys(data.games);\n  var stars = names.reduce(function (s, k) { return s + (data.games[k] || 0); }, 0);\n  sh.getRange(row, 1, 1, SUM_HEAD.length).setValues([[\n    name, cls, title, code, names.length, names.join(', '), stars,\n    data.best || '', data.cert ? 'Yes' : '', new Date(data.first), now, key, JSON.stringify(data)\n  ]]);\n}\n\nfunction setup_(ss) {\n  var log = ss.getSheetByName(LOG);\n  if (!log) {\n    var first = ss.getSheets()[0];\n    log = (ss.getSheets().length === 1 && first.getLastRow() === 0) ? first.setName(LOG) : ss.insertSheet(LOG);\n    head_(log, LOG_HEAD);\n    log.getRange('A:A').setNumberFormat('dd/mm/yyyy hh:mm');\n  }\n  var sum = ss.getSheetByName(SUM);\n  if (!sum) {\n    sum = ss.insertSheet(SUM, 0);\n    head_(sum, SUM_HEAD);\n    sum.getRange('J:K').setNumberFormat('dd/mm/yyyy hh:mm');\n    sum.hideColumns(SUM_HEAD.indexOf('Key') + 1, 2);\n  }\n}\n\nfunction head_(sh, cols) {\n  sh.getRange(1, 1, 1, cols.length).setValues([cols])\n    .setFontWeight('bold').setBackground('#23864f').setFontColor('#ffffff');\n  sh.setFrozenRows(1);\n}\n";
 function student(){ try { var s = JSON.parse(lsGet('fs:student')); return s && s.name ? s : null; } catch(e){ return null; } }
 function devId(){ var d = lsGet('fs:dev'); if (!d) { d = Math.random().toString(36).slice(2,10) + Date.now().toString(36).slice(-4); lsSet('fs:dev', d); } return d; }
 function trackUrl(){ var u = DATA.settings && DATA.settings.track; return (u && /^https:\/\/script\.google\.com\/macros\/s\/[^\s]+\/exec$/.test(u)) ? u : ''; }
@@ -839,12 +853,160 @@ function flushTrack(){
   } catch(e){ flushing = false; }
 }
 window.addEventListener('online', flushTrack);
+var TKEY_MEM = '';
+function teacherKey(){
+  var k = lsGet('fs:tkey') || TKEY_MEM;
+  if (!k) {
+    var a = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789', r = new Uint8Array(15);
+    try { crypto.getRandomValues(r); } catch(e){ for (var i=0;i<r.length;i++) r[i] = Math.floor(Math.random()*256); }
+    k = ''; for (var j=0;j<r.length;j++){ if (j && j%5===0) k += '-'; k += a[r[j] % a.length]; }
+    lsSet('fs:tkey', k); TKEY_MEM = k;
+  }
+  return k;
+}
+function codeWithKey(){ return TRACK_CODE.replace('__TEACHER_KEY__', teacherKey()); }
+
+/* ---------- teacher results page (on the student website, #results) ---------- */
+var RES = {data:null, err:'', loading:false, f:{code:'', cls:'', q:''}, sort:'last', dir:-1, open:{}};
+function inViewer(){ return !!(window.claude && window.claude.use); }
+function siteKey(){ return lsGet('fs:siteKey') || ''; }
+function jsonp(url){
+  return new Promise(function(res){
+    var cb = 'fsres' + Date.now(), s = document.createElement('script'), done = false;
+    function end(d){ if (done) return; done = true; try { delete window[cb]; } catch(e){ window[cb] = undefined; } s.remove(); res(d); }
+    window[cb] = function(d){ end(d); };
+    s.onerror = function(){ end({ok:false, error:'net'}); };
+    s.onload = function(){ setTimeout(function(){ end({ok:false, error:'old'}); }, 80); };
+    setTimeout(function(){ end({ok:false, error:'net'}); }, 25000);
+    s.src = url + '&callback=' + cb; document.head.append(s);
+  });
+}
+function loadRes(quiet){
+  var u = trackUrl(), k = siteKey(); if (!u || !k) return;
+  if (!quiet) { RES.loading = true; RES.err = ''; if (view.name === 'results') render(); }
+  var url = u + '?action=results&key=' + encodeURIComponent(k) + '&t=' + Date.now();
+  fetch(url).then(function(r){ return r.text(); }).then(function(t){ try { return JSON.parse(t); } catch(e){ return /^\s*</.test(t) ? {ok:false, error:'old'} : jsonp(url); } }, function(){ return jsonp(url); })
+    .then(function(d){
+      RES.loading = false;
+      if (d && d.ok === true) { RES.data = d; RES.err = ''; }
+      else if (d && d.error === 'key') { lsDel('fs:siteKey'); RES.data = null; RES.err = 'key'; }
+      else if (!quiet) RES.err = (d && d.error) || 'net';
+      if (view.name === 'results') render();
+    });
+}
+setInterval(function(){ if (view.name === 'results' && RES.data && document.visibilityState === 'visible') loadRes(true); }, 60000);
+function ago(iso){
+  var t = Date.parse(iso); if (!t) return '';
+  var m = Math.round((Date.now() - t) / 60000);
+  if (m < 1) return 'just now'; if (m < 60) return m + ' min ago';
+  var hh = Math.round(m / 60); if (hh < 24) return hh + ' h ago';
+  var d = Math.round(hh / 24); return d === 1 ? 'yesterday' : d + ' days ago';
+}
+function fmtTime(iso){ var t = new Date(iso); return isNaN(t) ? '' : t.toLocaleString('en-GB', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'}); }
+function totalGames(code, fallback){ var a = DATA.activities.find(function(x){ return x.code === code; }); return a ? enabledGames(a).length : fallback; }
+function sResults(w){
+  w.append(topBar(true));
+  var head = h('div',{class:'hero3d clay', style:'margin-bottom:18px'},
+    h('div',{class:'hero-txt'}, h('div',{class:'eyebrow'}, 'Teacher only'), h('h1',{class:'t3d'}, 'Class results'),
+      h('p',{class:'muted', style:'font-weight:700'}, 'Who has done the pre-lesson activities, and how well. Saved in your Google Sheet.')),
+    h('div',{class:'hero-art', 'aria-hidden':'true'}, I('books','f1'), I('trophy','f2'), I('glow','f3'), I('sparkles','f4'), I('medal','f5')));
+  w.append(head);
+  if (inViewer()) {
+    w.append(h('div',{class:'note'}, 'Results show on your student website, not inside Claude. ', isSiteLink() ? h('a',{href:studentLink(null)+'#results', target:'_blank', rel:'noopener'}, 'Open the Results page') : 'Set up your student website first.'));
+    return;
+  }
+  if (!trackUrl()) { w.append(h('p',{class:'note warn'}, 'Student tracking is not set up yet. Set it up in the FLIPSEED Teacher Studio, under "Student names & tracking".')); return; }
+  if (!siteKey()) {
+    var keyIn = h('input',{class:'inp big-inp', id:'t-key', autocomplete:'off', autocapitalize:'characters', spellcheck:'false', placeholder:'XXXXX-XXXXX-XXXXX'});
+    w.append(h('form',{class:'who clay', onsubmit:function(e){ e.preventDefault(); var k = keyIn.value.trim().toUpperCase(); if (k.length < 6) return; lsSet('fs:siteKey', k); RES.err = ''; loadRes(); }},
+      h('div',{class:'who-art', 'aria-hidden':'true'}, I('key','w1')),
+      h('h2',{class:'t3d', style:'text-align:center'}, 'Type your teacher key'),
+      h('p',{class:'muted', style:'text-align:center;font-weight:700'}, 'You can find it in the FLIPSEED Teacher Studio under "Student names & tracking", or in the first lines of your Apps Script code.'),
+      RES.err === 'key' ? h('p',{class:'note bad small'}, 'That key does not match your Google Sheet. Check it and try again.') : null,
+      h('div',{class:'field'}, h('label',{for:'t-key'}, 'Teacher key'), keyIn),
+      h('button',{class:'btn primary', type:'submit', style:'align-self:center;min-width:200px'}, I('check'), 'Show results'),
+      h('p',{class:'small muted', style:'text-align:center'}, 'This device will remember the key. Only use it on your own phone or computer.')));
+    return;
+  }
+  if (!RES.data && !RES.loading && !RES.err) { loadRes(); return; }
+  var d = RES.data;
+  var bar = h('div',{class:'row', style:'margin-bottom:14px'},
+    h('button',{class:'btn sm primary', disabled:RES.loading, onclick:function(){ loadRes(); }}, I('rotr'), RES.loading ? 'Loading…' : 'Refresh'),
+    d && d.sheet ? h('a',{class:'btn sm', href:d.sheet, target:'_blank', rel:'noopener'}, I('books'), 'Open Google Sheet') : null,
+    h('button',{class:'btn sm ghost', onclick:function(){ lsDel('fs:siteKey'); RES.data = null; RES.err = ''; render(); }}, 'Sign out'),
+    d ? h('span',{class:'small muted'}, 'Updated ' + fmtTime(d.now) + ' · refreshes every minute') : null);
+  w.append(bar);
+  if (RES.loading && !d) { w.append(h('div',{class:'progress'}, h('div',{class:'spin'}), 'Loading results from your Google Sheet…')); return; }
+  if (RES.err === 'old') { w.append(h('p',{class:'note warn'}, 'Your Google Sheet code needs a quick update before results can show here. In the FLIPSEED Teacher Studio, open "Student names & tracking" and follow "Update your Google script".')); return; }
+  if (RES.err && !d) { w.append(h('p',{class:'note bad'}, 'Could not reach your Google Sheet. Check your internet connection and press Refresh.')); return; }
+  var all = d.students || [];
+  if (!all.length) { w.append(h('p',{class:'note'}, 'No results yet. When students play on this website, they appear here.')); return; }
+  var acts = {}; all.forEach(function(r){ acts[r.code] = r.title; });
+  var classes = Array.from(new Set(all.map(function(r){ return String(r.cls||''); }).filter(Boolean))).sort();
+  var actSel = h('select',{class:'inp', id:'r-act', onchange:function(){ RES.f.code = this.value; paint(); }}, h('option',{value:''}, 'All activities'),
+    Object.keys(acts).map(function(c){ return h('option',{value:c, selected:RES.f.code===c}, acts[c]); }));
+  var clsSel = h('select',{class:'inp', id:'r-cls', onchange:function(){ RES.f.cls = this.value; paint(); }}, h('option',{value:''}, 'All classes'),
+    classes.map(function(c){ return h('option',{value:c, selected:RES.f.cls===c}, c); }));
+  var q = h('input',{class:'inp', id:'r-q', placeholder:'Search a student', value:RES.f.q, oninput:function(){ RES.f.q = this.value; paint(); }});
+  w.append(h('div',{class:'rfilters'}, h('div',{class:'field'}, h('label',{for:'r-act'}, 'Activity'), actSel), h('div',{class:'field'}, h('label',{for:'r-cls'}, 'Class'), clsSel), h('div',{class:'field'}, h('label',{for:'r-q'}, 'Student'), q)));
+  var stats = h('div',{class:'stats', style:'margin:16px 0'}), tableBox = h('div',{class:'tablewrap clay'});
+  w.append(stats, tableBox);
+  function rowsNow(){
+    var qq = RES.f.q.trim().toLowerCase();
+    return all.filter(function(r){ return (!RES.f.code || r.code === RES.f.code) && (!RES.f.cls || String(r.cls) === RES.f.cls) && (!qq || String(r.name).toLowerCase().indexOf(qq) >= 0); })
+      .map(function(r){ var done = Object.keys(r.games||{}).length, tot = Math.max(done, totalGames(r.code, done)); return Object.assign({}, r, {done:done, tot:tot, pct: tot ? done/tot : 0}); });
+  }
+  function paint(){
+    var rows = rowsNow();
+    var key = RES.sort, dir = RES.dir;
+    rows.sort(function(a, b){
+      var va = key==='name' ? String(a.name).toLowerCase() : key==='cls' ? String(a.cls) : key==='progress' ? a.pct : key==='stars' ? (+a.stars||0) : key==='best' ? (+a.best||0) : Date.parse(a.last)||0;
+      var vb = key==='name' ? String(b.name).toLowerCase() : key==='cls' ? String(b.cls) : key==='progress' ? b.pct : key==='stars' ? (+b.stars||0) : key==='best' ? (+b.best||0) : Date.parse(b.last)||0;
+      return (va > vb ? 1 : va < vb ? -1 : 0) * dir;
+    });
+    var people = new Set(rows.map(function(r){ return String(r.name).toLowerCase()+'|'+String(r.cls).toLowerCase(); })).size;
+    var finished = rows.filter(function(r){ return r.tot && r.done >= r.tot; }).length;
+    var certs = rows.filter(function(r){ return r.cert; }).length;
+    var played = rows.filter(function(r){ return r.done; });
+    var avg = played.length ? played.reduce(function(s, r){ return s + (+r.stars||0) / r.done; }, 0) / played.length : 0;
+    stats.textContent = '';
+    [[I('student'), people, 'students'], [I('check'), finished, 'finished every game'], [I('medal'), certs, 'certificates'], [I('star'), avg ? avg.toFixed(1) : '–', 'average stars per game']].forEach(function(x){
+      stats.append(h('div',{class:'stat'}, x[0], h('div',null, h('b',null, String(x[1])), h('div',{class:'small muted'}, x[2]))));
+    });
+    tableBox.textContent = '';
+    if (!rows.length) { tableBox.append(h('p',{class:'small muted', style:'padding:16px'}, 'No students match these filters.')); return; }
+    function th(label, k){ return h('th',null, h('button',{class:'sortbtn'+(RES.sort===k?' on':''), onclick:function(){ if (RES.sort===k) RES.dir = -RES.dir; else { RES.sort = k; RES.dir = (k==='name'||k==='cls') ? 1 : -1; } paint(); }}, label, RES.sort===k ? (RES.dir>0 ? ' ▲' : ' ▼') : '')); }
+    var tb = h('tbody');
+    rows.forEach(function(r){
+      var id = (r.name+'|'+r.cls+'|'+r.code).toLowerCase();
+      var avgS = r.done ? (+r.stars||0) / r.done : 0;
+      var tr = h('tr',{class:'rrow'+(RES.open[id]?' open':''), tabindex:'0', onclick:function(){ RES.open[id] = !RES.open[id]; paint(); }, onkeydown:function(e){ if (e.key==='Enter') this.click(); }},
+        h('td',null, h('b',null, r.name)), h('td',null, r.cls || '–'), h('td',{class:'small'}, r.title),
+        h('td',null, h('div',{class:'pbar'}, h('i',{style:'width:'+Math.round(r.pct*100)+'%'})), h('span',{class:'small muted'}, r.done+' / '+r.tot+' games')),
+        h('td',null, h('span',{class:'chip '+(avgS>=2.5?'live':avgS>=1.5?'':'draft')}, '★ '+(+r.stars||0))),
+        h('td',null, r.best ? String(r.best) : '–'),
+        h('td',null, r.cert ? I('medal') : '–'),
+        h('td',{class:'small', title:fmtTime(r.last)}, ago(r.last)));
+      tb.append(tr);
+      if (RES.open[id]) {
+        var evs = (d.events||[]).filter(function(e){ return (e.name+'|'+e.cls+'|'+e.code).toLowerCase() === id; }).sort(function(a,b){ return (Date.parse(b.time)||0) - (Date.parse(a.time)||0); });
+        tb.append(h('tr',{class:'rdetail'}, h('td',{colspan:'8'},
+          evs.length ? h('ul',{class:'tl'}, evs.slice(0, 40).map(function(e){
+            var bits = [e.what, e.game, e.stars !== '' && e.stars != null ? '★ '+e.stars : '', e.mistakes !== '' && e.mistakes != null ? e.mistakes+(+e.mistakes===1?' mistake':' mistakes') : '', e.hints ? e.hints+(+e.hints===1?' hint':' hints') : '', e.score !== '' && e.score != null ? e.score+' points' : '', e.secs ? Math.round(e.secs/60*10)/10+' min' : ''].filter(Boolean);
+            return h('li',null, h('span',{class:'small muted'}, fmtTime(e.time)), ' ', bits.join(' · '));
+          })) : h('span',{class:'small muted'}, 'No detailed events in the latest records.'))));
+      }
+    });
+    tableBox.append(h('table',{class:'rtable'}, h('thead',null, h('tr',null, th('Student','name'), th('Class','cls'), h('th',null,'Activity'), th('Progress','progress'), th('Stars','stars'), th('Challenge','best'), h('th',null,'Certificate'), th('Last active','last'))), tb));
+  }
+  paint();
+}
 function render(){
   $app.textContent = '';
   var w = h('div',{class:'wrap'}); $app.append(w);
   setTimeout(function(){ w.append(h('p',{class:'buildtag'}, BUILD)); }, 0);
   var V = {
-    home:sHome, hub:sHub, game:sGame, cert:sCert, who:sNameGate,
+    home:sHome, hub:sHub, game:sGame, cert:sCert, who:sNameGate, results:sResults,
     studio:tStudio, create:tCreate, edit:tEdit, share:tShare
   }[view.name] || sHome;
   if (!IS_TEACHER && ['studio','create','edit','share'].indexOf(view.name) >= 0) { view={name:'home'}; V=sHome; }
@@ -1522,7 +1684,8 @@ function tStudio(w){
   var trackIn = h('input',{class:'inp', id:'track-url', placeholder:'https://script.google.com/macros/s/…/exec', value:(DATA.settings && DATA.settings.track)||''});
   var classIn = h('input',{class:'inp', id:'class-list', placeholder:'e.g. 3A, 3B, 8C', value:((DATA.settings && DATA.settings.classes)||[]).join(', ')});
   var codeBox = h('textarea',{class:'inp', id:'track-code', readOnly:true, style:'min-height:140px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.78rem', 'aria-label':'Tracking code'});
-  codeBox.value = TRACK_CODE;
+  codeBox.value = codeWithKey();
+  var keyBox = h('input',{class:'inp', id:'t-keyshow', readOnly:true, value:teacherKey(), style:'font-family:ui-monospace,Menlo,Consolas,monospace;font-weight:800;letter-spacing:.06em', onfocus:function(){ this.select(); }});
   var tUrl = trackUrl();
   function tstep(n, title, body){ return h('div',{class:'step'}, h('span',{class:'stepn'}, n), h('div',{class:'stack', style:'gap:6px;min-width:0;flex:1'}, h('strong',null,title), body)); }
   w.append(h('div',{class:'panel stack', style:'margin-top:28px'},
@@ -1531,7 +1694,7 @@ function tStudio(w){
     tstep('1', 'Your classes', h('div',{class:'stack', style:'gap:6px'}, classIn, h('span',{class:'small muted'}, 'Separate classes with commas. Students pick their class from this list, which keeps your sheet tidy. Leave it empty to let them type it.'))),
     tUrl ? null : tstep('2', 'Create your results sheet', h('span',{class:'small'}, 'Open ', h('a',{href:'https://sheets.new', target:'_blank', rel:'noopener'}, 'sheets.new'), ' (a new Google Sheet) and name it FLIPSEED Results. Then click Extensions → Apps Script.')),
     tUrl ? null : tstep('3', 'Paste the tracking code', h('div',{class:'stack', style:'gap:6px'},
-      h('div',{class:'row'}, h('button',{class:'btn primary sm', onclick:function(){ copyText(TRACK_CODE, codeBox, 'Code copied. Paste it into Apps Script.'); }}, I('memo'), 'Copy the code')),
+      h('div',{class:'row'}, h('button',{class:'btn primary sm', onclick:function(){ copyText(codeWithKey(), codeBox, 'Code copied. Paste it into Apps Script.'); }}, I('memo'), 'Copy the code')),
       h('span',{class:'small'}, 'In Apps Script, delete everything in the editor, paste the code, and click Save (the disk icon).'),
       h('details',null, h('summary',{class:'small', style:'cursor:pointer;font-weight:800'}, 'Show the code'), codeBox))),
     tUrl ? null : tstep('4', 'Publish it as a web app', h('div',{class:'stack', style:'gap:4px'},
@@ -1542,7 +1705,18 @@ function tStudio(w){
     tstep(tUrl ? '2' : '5', tUrl ? 'Your web app address' : 'Paste the Web app URL here', trackIn),
     tUrl ? h('div',{class:'row'},
       h('a',{class:'btn sm', href:tUrl+'?test=1', target:'_blank', rel:'noopener'}, I('check'), 'Send a test row'),
-      h('a',{class:'btn sm', href:tUrl, target:'_blank', rel:'noopener'}, I('books'), 'Open my results')) : null,
+      h('a',{class:'btn sm', href:tUrl, target:'_blank', rel:'noopener'}, I('books'), 'Open my Google Sheet')) : null,
+    tstep(tUrl ? '3' : '6', 'Your teacher key', h('div',{class:'stack', style:'gap:6px'},
+      h('div',{class:'copyline'}, keyBox, h('button',{class:'btn sm', onclick:function(){ copyText(teacherKey(), keyBox, 'Key copied'); }}, I('key'), 'Copy key')),
+      h('span',{class:'small muted'}, 'This key is already inside the code you copy. You type it once on your website\'s Results page to see student results. Keep it private.'))),
+    tstep(tUrl ? '4' : '7', 'See results on your website', h('div',{class:'stack', style:'gap:6px'},
+      isSiteLink() ? h('div',{class:'row'}, h('a',{class:'btn sm sun', href:studentLink(null)+'#results', target:'_blank', rel:'noopener'}, I('trophy'), 'Open the Results page'), h('span',{class:'small muted'}, studentLink(null)+'#results')) : h('span',{class:'small muted'}, 'Set up your student website first.'),
+      h('span',{class:'small muted'}, 'Bookmark it. Results are saved in your Google Sheet and shown here, all in one place.'))),
+    tUrl ? tstep('5', 'Update your Google script (once)', h('div',{class:'stack', style:'gap:6px'},
+      h('span',{class:'small'}, 'If you set up tracking before this update, the Results page needs the new code. Copy it, paste it over the old code in Apps Script and click Save.'),
+      h('div',{class:'row'}, h('button',{class:'btn primary sm', onclick:function(){ copyText(codeWithKey(), codeBox, 'Code copied. Paste it into Apps Script.'); }}, I('memo'), 'Copy the new code')),
+      h('span',{class:'small'}, 'Then click Deploy → Manage deployments → the pencil ✏️ → Version: New version → Deploy. Your web app address stays the same.'),
+      h('details',null, h('summary',{class:'small', style:'cursor:pointer;font-weight:800'}, 'Show the code'), codeBox))) : null,
     h('div',{class:'row'}, h('button',{class:'btn primary sm', onclick:function(){
       var u = trackIn.value.trim();
       if (u && !/^https:\/\/script\.google\.com\/macros\/s\/[^\s]+\/exec$/.test(u)) { toast('That address should start with https://script.google.com/macros/s/ and end with /exec', 5000); return; }
@@ -2059,6 +2233,7 @@ buildBackground();
 /* ---- boot ---- */
 function routeFromHash(){
   var c = (location.hash||'').replace('#','');
+  if (c === 'results') return {name:'results'};
   var a = c && findByCode(c);
   return a ? {name:'hub', id:a.id} : null;
 }
