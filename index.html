@@ -92,6 +92,18 @@ a{color:var(--sky)}
 @media (max-width:560px){.hero-logo{flex-basis:auto;width:min(230px,70%);margin:0 auto}}
 [hidden]{display:none!important}
 .linkstrip{margin-top:4px}
+.rgroups{display:flex;flex-direction:column;gap:22px}
+.cls-box{border-radius:28px;padding:10px 12px 16px;background:linear-gradient(180deg,var(--sky-soft),transparent 120%);box-shadow:inset 0 0 0 2px var(--sheen),0 6px 0 var(--depth),0 20px 30px -18px var(--drop)}
+.cls-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;width:100%;border:0;background:none;padding:6px 6px 12px;cursor:pointer;text-align:left;color:var(--ink)}
+.cls-badge{display:grid;place-items:center;min-width:52px;height:52px;padding:0 10px;border-radius:16px;font-family:var(--f-display);font-weight:800;font-size:1.25rem;color:var(--on-leaf);background:linear-gradient(180deg,var(--leaf-hi),var(--leaf));box-shadow:0 4px 0 var(--leaf-depth)}
+.cls-title{font-family:var(--f-display);font-weight:800;font-size:1.5rem;flex:1;min-width:0}
+.cls-caret{font-size:1.3rem;color:var(--muted)}
+.cls-body{display:flex;flex-direction:column;gap:16px}
+.act-box{padding:14px 14px 8px}
+.act-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:2px 4px 8px}
+.act-head h3{margin-top:2px}
+.act-chips{display:flex;gap:6px;flex-wrap:wrap}
+.act-box .rtable{min-width:600px}
 .rfilters{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
 .tablewrap{overflow-x:auto;padding:6px;border-radius:var(--r)}
 .rtable{width:100%;border-collapse:collapse;min-width:760px;font-size:.95rem}
@@ -820,7 +832,7 @@ function topBar(student){
 
 /* ---------- routing ---------- */
 function go(v){ if (['studio','create','share','edit'].indexOf(v.name)>=0) PREVIEW = null; view = v; if (window.speechSynthesis) try{speechSynthesis.cancel()}catch(e){}; render(); window.scrollTo(0,0); }
-var BUILD = 'Update 23 Oct · links wait for new lessons';
+var BUILD = 'Update 23 Oct · results by class';
 var TRACK_CODE = "/* FLIPSEED student tracking\n   Paste this into your Google Sheet: Extensions \u2192 Apps Script.\n   Then Deploy \u2192 New deployment \u2192 Web app (Execute as: Me, Who has access: Anyone).\n\n   TEACHER KEY: you type this key on your website's Results page (\u2026/flipseed/#results).\n   Keep it private. Only someone with this key can see student results. */\nvar TEACHER_KEY = '__TEACHER_KEY__';\n\nvar LOG = 'Activity log';\nvar SUM = 'Students';\nvar LOG_HEAD = ['Time', 'Student', 'Class', 'Activity', 'Code', 'What happened', 'Game', 'Stars', 'Mistakes', 'Hints used', 'Score', 'Seconds', 'Device'];\nvar SUM_HEAD = ['Student', 'Class', 'Activity', 'Code', 'Games finished', 'Which games', 'Stars', 'Best challenge score', 'Certificate', 'First seen', 'Last active', 'Key', 'Data'];\nvar WHAT = { open: 'Opened the activity', game: 'Finished a game', challenge: 'Super Challenge', cert: 'Got the certificate', test: 'Test' };\n\nfunction doPost(e) {\n  var lock = LockService.getScriptLock();\n  lock.waitLock(25000);\n  try {\n    var body = JSON.parse((e && e.postData && e.postData.contents) || '[]');\n    var list = Array.isArray(body) ? body : [body];\n    var ss = SpreadsheetApp.getActiveSpreadsheet();\n    setup_(ss);\n    list.slice(0, 50).forEach(function (ev) { record_(ss, ev); });\n    return ContentService.createTextOutput('ok');\n  } catch (err) {\n    return ContentService.createTextOutput('error: ' + err);\n  } finally {\n    lock.releaseLock();\n  }\n}\n\nfunction doGet(e) {\n  if (e && e.parameter && e.parameter.action === 'results') return results_(e.parameter);\n  var ss = SpreadsheetApp.getActiveSpreadsheet();\n  var msg = 'FLIPSEED tracking is working.';\n  var lock = LockService.getScriptLock();\n  lock.waitLock(25000);\n  try {\n    setup_(ss);\n    if (e && e.parameter && e.parameter.test) {\n      record_(ss, { type: 'test', name: 'Test student', cls: 'Test', code: 'test', title: 'Test from the teacher', dev: 'teacher' });\n      msg += ' A test row was added to your sheet.';\n    }\n  } finally {\n    lock.releaseLock();\n  }\n  var html = '<div style=\"font-family:Arial,sans-serif;padding:24px;max-width:540px\">' +\n    '<h2 style=\"color:#23864f\">&#10004; ' + msg + '</h2>' +\n    '<p><a href=\"' + ss.getUrl() + '\" target=\"_blank\" style=\"font-size:18px\">Open your FLIPSEED results sheet</a></p></div>';\n  return HtmlService.createHtmlOutput(html).setTitle('FLIPSEED tracking');\n}\n\nfunction results_(p) {\n  var out;\n  if (!TEACHER_KEY || TEACHER_KEY.indexOf('__') === 0 || String(p.key || '') !== TEACHER_KEY) {\n    out = { ok: false, error: 'key' };\n  } else {\n    var ss = SpreadsheetApp.getActiveSpreadsheet();\n    setup_(ss);\n    var sum = ss.getSheetByName(SUM), log = ss.getSheetByName(LOG);\n    var students = [], events = [];\n    if (sum.getLastRow() > 1) {\n      sum.getRange(2, 1, sum.getLastRow() - 1, SUM_HEAD.length).getValues().forEach(function (r) {\n        var d = {}; try { d = JSON.parse(r[12] || '{}'); } catch (x) {}\n        students.push({ name: r[0], cls: r[1], title: r[2], code: r[3], games: d.games || {}, stars: r[6],\n          best: r[7], cert: r[8] === 'Yes', first: iso_(r[9]), last: iso_(r[10]) });\n      });\n    }\n    var n = log.getLastRow() - 1;\n    if (n > 0) {\n      var take = Math.min(n, 2000);\n      log.getRange(log.getLastRow() - take + 1, 1, take, LOG_HEAD.length).getValues().forEach(function (r) {\n        events.push({ time: iso_(r[0]), name: r[1], cls: r[2], title: r[3], code: r[4], what: r[5], game: r[6],\n          stars: r[7], mistakes: r[8], hints: r[9], score: r[10], secs: r[11] });\n      });\n    }\n    out = { ok: true, sheet: ss.getUrl(), now: new Date().toISOString(), students: students, events: events };\n  }\n  var json = JSON.stringify(out);\n  if (p.callback && /^[A-Za-z_$][\\w$]{0,40}$/.test(p.callback)) {\n    return ContentService.createTextOutput(p.callback + '(' + json + ')').setMimeType(ContentService.MimeType.JAVASCRIPT);\n  }\n  return ContentService.createTextOutput(json).setMimeType(ContentService.MimeType.JSON);\n}\n\nfunction iso_(v) {\n  return v instanceof Date ? v.toISOString() : (v ? String(v) : '');\n}\n\nfunction clean_(v, n) {\n  v = String(v == null ? '' : v).replace(/[\\u0000-\\u001f]/g, ' ').replace(/\\s+/g, ' ').trim().slice(0, n || 80);\n  return /^[=+\\-@]/.test(v) ? \"'\" + v : v;\n}\n\nfunction num_(v) {\n  v = Number(v);\n  return isFinite(v) ? v : '';\n}\n\nfunction record_(ss, ev) {\n  if (!ev || !ev.name || !ev.code) return;\n  var now = new Date();\n  var name = clean_(ev.name, 40), cls = clean_(ev.cls, 20), code = clean_(ev.code, 10);\n  var title = clean_(ev.title, 80), dev = clean_(ev.dev, 40), game = clean_(ev.game, 40);\n  var type = WHAT[ev.type] ? ev.type : 'game';\n\n  ss.getSheetByName(LOG).appendRow([now, name, cls, title, code, WHAT[type], game,\n    num_(ev.stars), num_(ev.mistakes), num_(ev.hints), num_(ev.score), num_(ev.secs), dev]);\n  if (type === 'test') return;\n\n  var sh = ss.getSheetByName(SUM);\n  var key = (name.toLowerCase() + '|' + cls.toLowerCase() + '|' + code.toLowerCase()).slice(0, 120);\n  var keyCol = SUM_HEAD.indexOf('Key') + 1;\n  var rows = Math.max(1, sh.getLastRow() - 1);\n  var found = sh.getRange(2, keyCol, rows, 1).createTextFinder(key).matchEntireCell(true).findNext();\n  var row, data;\n  if (found) {\n    row = found.getRow();\n    try { data = JSON.parse(sh.getRange(row, keyCol + 1).getValue() || '{}'); } catch (x) { data = {}; }\n  } else {\n    row = sh.getLastRow() + 1;\n    data = {};\n  }\n  data.games = data.games || {};\n  data.first = data.first || now.toISOString();\n  if (type === 'game' && game) data.games[game] = Math.max(data.games[game] || 0, Number(ev.stars) || 0);\n  if (type === 'challenge') data.best = Math.max(data.best || 0, Number(ev.score) || 0);\n  if (type === 'cert') data.cert = true;\n\n  var names = Object.keys(data.games);\n  var stars = names.reduce(function (s, k) { return s + (data.games[k] || 0); }, 0);\n  sh.getRange(row, 1, 1, SUM_HEAD.length).setValues([[\n    name, cls, title, code, names.length, names.join(', '), stars,\n    data.best || '', data.cert ? 'Yes' : '', new Date(data.first), now, key, JSON.stringify(data)\n  ]]);\n}\n\nfunction setup_(ss) {\n  var log = ss.getSheetByName(LOG);\n  if (!log) {\n    var first = ss.getSheets()[0];\n    log = (ss.getSheets().length === 1 && first.getLastRow() === 0) ? first.setName(LOG) : ss.insertSheet(LOG);\n    head_(log, LOG_HEAD);\n    log.getRange('A:A').setNumberFormat('dd/mm/yyyy hh:mm');\n  }\n  var sum = ss.getSheetByName(SUM);\n  if (!sum) {\n    sum = ss.insertSheet(SUM, 0);\n    head_(sum, SUM_HEAD);\n    sum.getRange('J:K').setNumberFormat('dd/mm/yyyy hh:mm');\n    sum.hideColumns(SUM_HEAD.indexOf('Key') + 1, 2);\n  }\n}\n\nfunction head_(sh, cols) {\n  sh.getRange(1, 1, 1, cols.length).setValues([cols])\n    .setFontWeight('bold').setBackground('#23864f').setFontColor('#ffffff');\n  sh.setFrozenRows(1);\n}\n";
 function student(){ try { var s = JSON.parse(lsGet('fs:student')); return s && s.name ? s : null; } catch(e){ return null; } }
 function devId(){ var d = lsGet('fs:dev'); if (!d) { d = Math.random().toString(36).slice(2,10) + Date.now().toString(36).slice(-4); lsSet('fs:dev', d); } return d; }
@@ -950,12 +962,12 @@ function sResults(w){
     classes.map(function(c){ return h('option',{value:c, selected:RES.f.cls===c}, c); }));
   var q = h('input',{class:'inp', id:'r-q', placeholder:'Search a student', value:RES.f.q, oninput:function(){ RES.f.q = this.value; paint(); }});
   w.append(h('div',{class:'rfilters'}, h('div',{class:'field'}, h('label',{for:'r-act'}, 'Activity'), actSel), h('div',{class:'field'}, h('label',{for:'r-cls'}, 'Class'), clsSel), h('div',{class:'field'}, h('label',{for:'r-q'}, 'Student'), q)));
-  var stats = h('div',{class:'stats', style:'margin:16px 0'}), tableBox = h('div',{class:'tablewrap clay'});
+  var stats = h('div',{class:'stats', style:'margin:16px 0'}), tableBox = h('div',{class:'rgroups'});
   w.append(stats, tableBox);
   function rowsNow(){
     var qq = RES.f.q.trim().toLowerCase();
     return all.filter(function(r){ return (!RES.f.code || r.code === RES.f.code) && (!RES.f.cls || String(r.cls) === RES.f.cls) && (!qq || String(r.name).toLowerCase().indexOf(qq) >= 0); })
-      .map(function(r){ var done = Object.keys(r.games||{}).length, tot = Math.max(done, totalGames(r.code, done)); return Object.assign({}, r, {done:done, tot:tot, pct: tot ? done/tot : 0}); });
+      .map(function(r){ var done = Object.keys(r.games||{}).length, T = totalGames(r.code, null), tot = T == null ? null : Math.max(done, T); return Object.assign({}, r, {done:done, tot:tot, pct: tot ? done/tot : 0}); });
   }
   function paint(){
     var rows = rowsNow();
@@ -975,30 +987,68 @@ function sResults(w){
       stats.append(h('div',{class:'stat'}, x[0], h('div',null, h('b',null, String(x[1])), h('div',{class:'small muted'}, x[2]))));
     });
     tableBox.textContent = '';
-    if (!rows.length) { tableBox.append(h('p',{class:'small muted', style:'padding:16px'}, 'No students match these filters.')); return; }
-    function th(label, k){ return h('th',null, h('button',{class:'sortbtn'+(RES.sort===k?' on':''), onclick:function(){ if (RES.sort===k) RES.dir = -RES.dir; else { RES.sort = k; RES.dir = (k==='name'||k==='cls') ? 1 : -1; } paint(); }}, label, RES.sort===k ? (RES.dir>0 ? ' ▲' : ' ▼') : '')); }
-    var tb = h('tbody');
-    rows.forEach(function(r){
-      var id = (r.name+'|'+r.cls+'|'+r.code).toLowerCase();
-      var avgS = r.done ? (+r.stars||0) / r.done : 0;
-      var tr = h('tr',{class:'rrow'+(RES.open[id]?' open':''), tabindex:'0', onclick:function(){ RES.open[id] = !RES.open[id]; paint(); }, onkeydown:function(e){ if (e.key==='Enter') this.click(); }},
-        h('td',null, h('b',null, r.name)), h('td',null, r.cls || '–'), h('td',{class:'small'}, r.title),
-        h('td',null, h('div',{class:'pbar'}, h('i',{style:'width:'+Math.round(r.pct*100)+'%'})), h('span',{class:'small muted'}, r.done+' / '+r.tot+' games')),
-        h('td',null, h('span',{class:'chip '+(avgS>=2.5?'live':avgS>=1.5?'':'draft')}, '★ '+(+r.stars||0))),
-        h('td',null, r.best ? String(r.best) : '–'),
-        h('td',null, r.cert ? I('medal') : '–'),
-        h('td',{class:'small', title:fmtTime(r.last)}, ago(r.last)));
-      tb.append(tr);
-      if (RES.open[id]) {
-        var evs = (d.events||[]).filter(function(e){ return (e.name+'|'+e.cls+'|'+e.code).toLowerCase() === id; }).sort(function(a,b){ return (Date.parse(b.time)||0) - (Date.parse(a.time)||0); });
-        tb.append(h('tr',{class:'rdetail'}, h('td',{colspan:'8'},
-          evs.length ? h('ul',{class:'tl'}, evs.slice(0, 40).map(function(e){
-            var bits = [e.what, e.game, e.stars !== '' && e.stars != null ? '★ '+e.stars : '', e.mistakes !== '' && e.mistakes != null ? e.mistakes+(+e.mistakes===1?' mistake':' mistakes') : '', e.hints ? e.hints+(+e.hints===1?' hint':' hints') : '', e.score !== '' && e.score != null ? e.score+' points' : '', e.secs ? Math.round(e.secs/60*10)/10+' min' : ''].filter(Boolean);
-            return h('li',null, h('span',{class:'small muted'}, fmtTime(e.time)), ' ', bits.join(' · '));
-          })) : h('span',{class:'small muted'}, 'No detailed events in the latest records.'))));
-      }
+    if (!rows.length) { tableBox.append(h('p',{class:'note small'}, 'No students match these filters.')); return; }
+    function th(label, k){ return h('th',null, h('button',{class:'sortbtn'+(RES.sort===k?' on':''), onclick:function(){ if (RES.sort===k) RES.dir = -RES.dir; else { RES.sort = k; RES.dir = k==='name' ? 1 : -1; } paint(); }}, label, RES.sort===k ? (RES.dir>0 ? ' ▲' : ' ▼') : '')); }
+    function studentTable(list){
+      var tb = h('tbody');
+      list.forEach(function(r){
+        var id = (r.name+'|'+r.cls+'|'+r.code).toLowerCase();
+        var avgS = r.done ? (+r.stars||0) / r.done : 0;
+        tb.append(h('tr',{class:'rrow'+(RES.open[id]?' open':''), tabindex:'0', onclick:function(){ RES.open[id] = !RES.open[id]; paint(); }, onkeydown:function(e){ if (e.key==='Enter') this.click(); }},
+          h('td',null, h('b',null, r.name)),
+          h('td',null, r.tot == null ? null : h('div',{class:'pbar'}, h('i',{style:'width:'+Math.round(r.pct*100)+'%'})), h('span',{class:'small muted'}, r.tot == null ? r.done+(r.done===1?' game':' games')+' (activity removed)' : r.done+' / '+r.tot+' games')),
+          h('td',null, h('span',{class:'chip '+(avgS>=2.5?'live':avgS>=1.5?'':'draft')}, '★ '+(+r.stars||0))),
+          h('td',null, r.best ? String(r.best) : '–'),
+          h('td',null, r.cert ? I('medal') : '–'),
+          h('td',{class:'small', title:fmtTime(r.last)}, ago(r.last))));
+        if (RES.open[id]) {
+          var evs = (d.events||[]).filter(function(e){ return (e.name+'|'+e.cls+'|'+e.code).toLowerCase() === id; }).sort(function(a,b){ return (Date.parse(b.time)||0) - (Date.parse(a.time)||0); });
+          tb.append(h('tr',{class:'rdetail'}, h('td',{colspan:'6'},
+            evs.length ? h('ul',{class:'tl'}, evs.slice(0, 40).map(function(e){
+              var bits = [e.what, e.game, e.stars !== '' && e.stars != null ? '★ '+e.stars : '', e.mistakes !== '' && e.mistakes != null ? e.mistakes+(+e.mistakes===1?' mistake':' mistakes') : '', e.hints ? e.hints+(+e.hints===1?' hint':' hints') : '', e.score !== '' && e.score != null ? e.score+' points' : '', e.secs ? Math.round(e.secs/60*10)/10+' min' : ''].filter(Boolean);
+              return h('li',null, h('span',{class:'small muted'}, fmtTime(e.time)), ' ', bits.join(' · '));
+            })) : h('span',{class:'small muted'}, 'No detailed events in the latest records.'))));
+        }
+      });
+      return h('div',{class:'tablewrap'}, h('table',{class:'rtable'}, h('thead',null, h('tr',null, th('Student','name'), th('Progress','progress'), th('Stars','stars'), th('Challenge','best'), h('th',null,'Certificate'), th('Last active','last'))), tb));
+    }
+    // group: class -> activity
+    var byClass = {};
+    rows.forEach(function(r){ var c = String(r.cls||'').trim() || '—'; (byClass[c] = byClass[c] || []).push(r); });
+    var classNames = Object.keys(byClass).sort(function(a,b){ return a === '—' ? 1 : b === '—' ? -1 : a.localeCompare(b, undefined, {numeric:true, sensitivity:'base'}); });
+    classNames.forEach(function(c){
+      var list = byClass[c];
+      var nStu = new Set(list.map(function(r){ return String(r.name).toLowerCase(); })).size;
+      var byAct = {}; list.forEach(function(r){ (byAct[r.code] = byAct[r.code] || {title:r.title, rows:[]}).rows.push(r); });
+      var codes = Object.keys(byAct).sort(function(a,b){
+        var la = Math.max.apply(null, byAct[a].rows.map(function(r){ return Date.parse(r.last)||0; })), lb = Math.max.apply(null, byAct[b].rows.map(function(r){ return Date.parse(r.last)||0; }));
+        return lb - la; });
+      var openKey = 'cls:'+c, closed = RES.open[openKey] === false;
+      var body = h('div',{class:'cls-body', hidden:closed});
+      codes.forEach(function(code){
+        var g = byAct[code], rs = g.rows;
+        var fin = rs.filter(function(r){ return r.tot && r.done >= r.tot; }).length;
+        var cer = rs.filter(function(r){ return r.cert; }).length;
+        var pl = rs.filter(function(r){ return r.done; });
+        var av = pl.length ? pl.reduce(function(s2, r){ return s2 + (+r.stars||0) / r.done; }, 0) / pl.length : 0;
+        body.append(h('section',{class:'act-box clay'},
+          h('div',{class:'act-head'},
+            h('div',{style:'min-width:0'}, h('div',{class:'eyebrow'}, 'Activity · code '+String(code).toUpperCase()), h('h3',null, g.title)),
+            h('div',{class:'act-chips'},
+              h('span',{class:'chip'}, rs.length+(rs.length===1?' student':' students')),
+              h('span',{class:'chip '+(fin?'live':'')}, fin+' finished'),
+              h('span',{class:'chip'}, cer+(cer===1?' certificate':' certificates')),
+              h('span',{class:'chip'}, '★ '+(av ? av.toFixed(1) : '–')+' avg'))),
+          studentTable(rs)));
+      });
+      tableBox.append(h('section',{class:'cls-box'},
+        h('button',{class:'cls-head', 'aria-expanded':closed?'false':'true', onclick:function(){ RES.open[openKey] = closed ? true : false; paint(); }},
+          h('span',{class:'cls-badge'}, c === '—' ? '?' : c),
+          h('span',{class:'cls-title'}, c === '—' ? 'No class given' : 'Class '+c),
+          h('span',{class:'small muted'}, nStu+(nStu===1?' student':' students')+' · '+codes.length+(codes.length===1?' activity':' activities')),
+          h('span',{class:'cls-caret', 'aria-hidden':'true'}, closed ? '▸' : '▾')),
+        body));
     });
-    tableBox.append(h('table',{class:'rtable'}, h('thead',null, h('tr',null, th('Student','name'), th('Class','cls'), h('th',null,'Activity'), th('Progress','progress'), th('Stars','stars'), th('Challenge','best'), h('th',null,'Certificate'), th('Last active','last'))), tb));
   }
   paint();
 }
@@ -2338,4 +2388,5 @@ window.addEventListener('hashchange', function(){ var r = routeFromHash(); if (r
 })();
 })();
 </script>
+
 </body></html>
