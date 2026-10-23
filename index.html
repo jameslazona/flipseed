@@ -441,7 +441,8 @@ function growth(st, cls){ return h('div',{class:'growth'+(cls?' '+cls:''), 'aria
 function starRow(n, cls){ var r=h('div',{class:cls||'stars', role:'img', 'aria-label':n+' stars'}); for (var i=0;i<3;i++) r.append(I('star', i<n?'':'off')); return r; }
 var GAME_TINT = {flash:2, match:1, listen:4, memory:5, quiz:6, spell:3, gap:2, search:1, sort:4, challenge:2};
 var $app = document.getElementById('app');
-var CAP = {user:null, artifact:null, sample:null, downloads:null};
+var CAP = {user:null, artifact:null, sample:null, downloads:null, mcp:null};
+var SYNC_TASK = 'trig_01LH34455P7HhZrHkC3NDw8Z';
 var IS_TEACHER = false;
 var LANG = lsGet('fs:lang') || 'en';
 var view = {name:'home'};
@@ -819,7 +820,7 @@ function topBar(student){
 
 /* ---------- routing ---------- */
 function go(v){ if (['studio','create','share','edit'].indexOf(v.name)>=0) PREVIEW = null; view = v; if (window.speechSynthesis) try{speechSynthesis.cancel()}catch(e){}; render(); window.scrollTo(0,0); }
-var BUILD = 'Update 23 Oct · results page';
+var BUILD = 'Update 23 Oct · instant website update';
 var TRACK_CODE = "/* FLIPSEED student tracking\n   Paste this into your Google Sheet: Extensions \u2192 Apps Script.\n   Then Deploy \u2192 New deployment \u2192 Web app (Execute as: Me, Who has access: Anyone).\n\n   TEACHER KEY: you type this key on your website's Results page (\u2026/flipseed/#results).\n   Keep it private. Only someone with this key can see student results. */\nvar TEACHER_KEY = '__TEACHER_KEY__';\n\nvar LOG = 'Activity log';\nvar SUM = 'Students';\nvar LOG_HEAD = ['Time', 'Student', 'Class', 'Activity', 'Code', 'What happened', 'Game', 'Stars', 'Mistakes', 'Hints used', 'Score', 'Seconds', 'Device'];\nvar SUM_HEAD = ['Student', 'Class', 'Activity', 'Code', 'Games finished', 'Which games', 'Stars', 'Best challenge score', 'Certificate', 'First seen', 'Last active', 'Key', 'Data'];\nvar WHAT = { open: 'Opened the activity', game: 'Finished a game', challenge: 'Super Challenge', cert: 'Got the certificate', test: 'Test' };\n\nfunction doPost(e) {\n  var lock = LockService.getScriptLock();\n  lock.waitLock(25000);\n  try {\n    var body = JSON.parse((e && e.postData && e.postData.contents) || '[]');\n    var list = Array.isArray(body) ? body : [body];\n    var ss = SpreadsheetApp.getActiveSpreadsheet();\n    setup_(ss);\n    list.slice(0, 50).forEach(function (ev) { record_(ss, ev); });\n    return ContentService.createTextOutput('ok');\n  } catch (err) {\n    return ContentService.createTextOutput('error: ' + err);\n  } finally {\n    lock.releaseLock();\n  }\n}\n\nfunction doGet(e) {\n  if (e && e.parameter && e.parameter.action === 'results') return results_(e.parameter);\n  var ss = SpreadsheetApp.getActiveSpreadsheet();\n  var msg = 'FLIPSEED tracking is working.';\n  var lock = LockService.getScriptLock();\n  lock.waitLock(25000);\n  try {\n    setup_(ss);\n    if (e && e.parameter && e.parameter.test) {\n      record_(ss, { type: 'test', name: 'Test student', cls: 'Test', code: 'test', title: 'Test from the teacher', dev: 'teacher' });\n      msg += ' A test row was added to your sheet.';\n    }\n  } finally {\n    lock.releaseLock();\n  }\n  var html = '<div style=\"font-family:Arial,sans-serif;padding:24px;max-width:540px\">' +\n    '<h2 style=\"color:#23864f\">&#10004; ' + msg + '</h2>' +\n    '<p><a href=\"' + ss.getUrl() + '\" target=\"_blank\" style=\"font-size:18px\">Open your FLIPSEED results sheet</a></p></div>';\n  return HtmlService.createHtmlOutput(html).setTitle('FLIPSEED tracking');\n}\n\nfunction results_(p) {\n  var out;\n  if (!TEACHER_KEY || TEACHER_KEY.indexOf('__') === 0 || String(p.key || '') !== TEACHER_KEY) {\n    out = { ok: false, error: 'key' };\n  } else {\n    var ss = SpreadsheetApp.getActiveSpreadsheet();\n    setup_(ss);\n    var sum = ss.getSheetByName(SUM), log = ss.getSheetByName(LOG);\n    var students = [], events = [];\n    if (sum.getLastRow() > 1) {\n      sum.getRange(2, 1, sum.getLastRow() - 1, SUM_HEAD.length).getValues().forEach(function (r) {\n        var d = {}; try { d = JSON.parse(r[12] || '{}'); } catch (x) {}\n        students.push({ name: r[0], cls: r[1], title: r[2], code: r[3], games: d.games || {}, stars: r[6],\n          best: r[7], cert: r[8] === 'Yes', first: iso_(r[9]), last: iso_(r[10]) });\n      });\n    }\n    var n = log.getLastRow() - 1;\n    if (n > 0) {\n      var take = Math.min(n, 2000);\n      log.getRange(log.getLastRow() - take + 1, 1, take, LOG_HEAD.length).getValues().forEach(function (r) {\n        events.push({ time: iso_(r[0]), name: r[1], cls: r[2], title: r[3], code: r[4], what: r[5], game: r[6],\n          stars: r[7], mistakes: r[8], hints: r[9], score: r[10], secs: r[11] });\n      });\n    }\n    out = { ok: true, sheet: ss.getUrl(), now: new Date().toISOString(), students: students, events: events };\n  }\n  var json = JSON.stringify(out);\n  if (p.callback && /^[A-Za-z_$][\\w$]{0,40}$/.test(p.callback)) {\n    return ContentService.createTextOutput(p.callback + '(' + json + ')').setMimeType(ContentService.MimeType.JAVASCRIPT);\n  }\n  return ContentService.createTextOutput(json).setMimeType(ContentService.MimeType.JSON);\n}\n\nfunction iso_(v) {\n  return v instanceof Date ? v.toISOString() : (v ? String(v) : '');\n}\n\nfunction clean_(v, n) {\n  v = String(v == null ? '' : v).replace(/[\\u0000-\\u001f]/g, ' ').replace(/\\s+/g, ' ').trim().slice(0, n || 80);\n  return /^[=+\\-@]/.test(v) ? \"'\" + v : v;\n}\n\nfunction num_(v) {\n  v = Number(v);\n  return isFinite(v) ? v : '';\n}\n\nfunction record_(ss, ev) {\n  if (!ev || !ev.name || !ev.code) return;\n  var now = new Date();\n  var name = clean_(ev.name, 40), cls = clean_(ev.cls, 20), code = clean_(ev.code, 10);\n  var title = clean_(ev.title, 80), dev = clean_(ev.dev, 40), game = clean_(ev.game, 40);\n  var type = WHAT[ev.type] ? ev.type : 'game';\n\n  ss.getSheetByName(LOG).appendRow([now, name, cls, title, code, WHAT[type], game,\n    num_(ev.stars), num_(ev.mistakes), num_(ev.hints), num_(ev.score), num_(ev.secs), dev]);\n  if (type === 'test') return;\n\n  var sh = ss.getSheetByName(SUM);\n  var key = (name.toLowerCase() + '|' + cls.toLowerCase() + '|' + code.toLowerCase()).slice(0, 120);\n  var keyCol = SUM_HEAD.indexOf('Key') + 1;\n  var rows = Math.max(1, sh.getLastRow() - 1);\n  var found = sh.getRange(2, keyCol, rows, 1).createTextFinder(key).matchEntireCell(true).findNext();\n  var row, data;\n  if (found) {\n    row = found.getRow();\n    try { data = JSON.parse(sh.getRange(row, keyCol + 1).getValue() || '{}'); } catch (x) { data = {}; }\n  } else {\n    row = sh.getLastRow() + 1;\n    data = {};\n  }\n  data.games = data.games || {};\n  data.first = data.first || now.toISOString();\n  if (type === 'game' && game) data.games[game] = Math.max(data.games[game] || 0, Number(ev.stars) || 0);\n  if (type === 'challenge') data.best = Math.max(data.best || 0, Number(ev.score) || 0);\n  if (type === 'cert') data.cert = true;\n\n  var names = Object.keys(data.games);\n  var stars = names.reduce(function (s, k) { return s + (data.games[k] || 0); }, 0);\n  sh.getRange(row, 1, 1, SUM_HEAD.length).setValues([[\n    name, cls, title, code, names.length, names.join(', '), stars,\n    data.best || '', data.cert ? 'Yes' : '', new Date(data.first), now, key, JSON.stringify(data)\n  ]]);\n}\n\nfunction setup_(ss) {\n  var log = ss.getSheetByName(LOG);\n  if (!log) {\n    var first = ss.getSheets()[0];\n    log = (ss.getSheets().length === 1 && first.getLastRow() === 0) ? first.setName(LOG) : ss.insertSheet(LOG);\n    head_(log, LOG_HEAD);\n    log.getRange('A:A').setNumberFormat('dd/mm/yyyy hh:mm');\n  }\n  var sum = ss.getSheetByName(SUM);\n  if (!sum) {\n    sum = ss.insertSheet(SUM, 0);\n    head_(sum, SUM_HEAD);\n    sum.getRange('J:K').setNumberFormat('dd/mm/yyyy hh:mm');\n    sum.hideColumns(SUM_HEAD.indexOf('Key') + 1, 2);\n  }\n}\n\nfunction head_(sh, cols) {\n  sh.getRange(1, 1, 1, cols.length).setValues([cols])\n    .setFontWeight('bold').setBackground('#23864f').setFontColor('#ffffff');\n  sh.setFrozenRows(1);\n}\n";
 function student(){ try { var s = JSON.parse(lsGet('fs:student')); return s && s.name ? s : null; } catch(e){ return null; } }
 function devId(){ var d = lsGet('fs:dev'); if (!d) { d = Math.random().toString(36).slice(2,10) + Date.now().toString(36).slice(-4); lsSet('fs:dev', d); } return d; }
@@ -1060,6 +1061,10 @@ function sHome(w){
     h('div',{class:'hero-txt'}, h('div',{class:'row', style:'gap:6px'}, I('sparkles'), h('span',{class:'eyebrow'}, LANG==='vi'?'Học trước, hiểu sâu hơn':'Learn first, understand more')), h('h1',{class:'t3d'},t('choose')), h('p',{style:'font-size:1.1rem;font-weight:700', class:'muted'},t('hello'))),
     h('div',{class:'hero-logo'}, h('img',{src:ICONS.logo, alt:'FLIPSEED logo'}))
   ));
+  if (view.missing) w.append(h('div',{class:'note warn', style:'margin-top:18px;font-weight:700'}, LANG==='vi'
+    ? 'Bài học có mã "'+view.missing.toUpperCase()+'" chưa sẵn sàng. Em hãy thử lại sau vài phút, hoặc hỏi thầy cô nhé.'
+    : 'The lesson with code "'+view.missing.toUpperCase()+'" is not ready yet. Please try again in a few minutes, or ask your teacher.',
+    ' ', h('button',{class:'btn sm', onclick:function(){ location.reload(); }}, I('rotr'), LANG==='vi'?'Thử lại':'Try again')));
   var pill = whoPill(); if (pill) w.append(pill);
   var codeIn = h('input',{class:'inp', id:'s-code', placeholder:'abcd', maxlength:'6', autocomplete:'off', style:'max-width:140px;text-transform:lowercase'});
   var msg = h('span',{class:'small muted', 'aria-live':'polite'});
@@ -1629,13 +1634,15 @@ function zaloMsg(a){
   return 'Hello class! Before our next Science lesson, please learn the new words for "'+a.title+'" here: '+l+' (code: '+c+')\n\n' +
     'Chào các em! Trước buổi học Khoa học tiếp theo, các em hãy học từ mới của bài "'+a.title+'" tại đây: '+l+' (mã: '+c+')';
 }
+function syncingNow(){ var t = +(lsGet('fs:syncAt')||0); return t && Date.now() - t < 5*60*1000; }
 function linkStrip(a, id){
   var l = studentLink(a);
   var inp = h('input',{class:'inp', id:id, value:l, readOnly:true, 'aria-label':'Student link for '+a.title, onfocus:function(){ this.select(); }});
   return h('div',{class:'linkstrip'},
     h('div',{class:'copyline'}, inp,
       h('button',{class:'btn sm primary', onclick:function(){ copy(l, inp, 'Link copied'); }}, I('link'), 'Copy link'),
-      h('button',{class:'btn sm', onclick:function(){ copy(zaloMsg(a), inp, 'Message copied. Paste it in your Zalo group.'); }}, I('phone'), 'Copy Zalo message')));
+      h('button',{class:'btn sm', onclick:function(){ copy(zaloMsg(a), inp, 'Message copied. Paste it in your Zalo group.'); }}, I('phone'), 'Copy Zalo message')),
+    isSiteLink() && syncingNow() && (a.updated||0) > (+(lsGet('fs:syncAt')||0)) - 120000 ? h('p',{class:'small', style:'margin-top:4px;font-weight:800;color:var(--sun-depth)'}, '⏳ Going live on your website in about 3 minutes. Send the link after that.') : null);
 }
 function pageSize(){ return new Blob([buildHtml()]).size; }
 
@@ -2190,12 +2197,27 @@ function buildHtml(data){
     '<script id="fs-app">' + SRC_APP + '<\/script>\n</body></html>';
 }
 var saving = false;
+function syncWebsite(){
+  if (!isSiteLink()) return;
+  var note = function(m, ms){ toast(m, ms || 6000); };
+  if (!CAP.mcp) { note('Saved. Your student website updates within the hour.'); return; }
+  lsSet('fs:syncAt', String(Date.now()));
+  CAP.mcp.callTool('Claude Code Remote', 'fire_trigger', {trigger_id: SYNC_TASK}).then(function(){
+    note('Saved. Your student website is updating now and will be ready in about 3 minutes.', 7000);
+    render();
+  }, function(e){
+    var c = e && e.code;
+    if (c === 'approval_required' || c === 'not_in_manifest') note('Saved. To update your website straight away next time, click Allow when Claude asks. For now it updates within the hour.', 8000);
+    else if (c === 'server_not_connected' || c === 'needs_reauth') note('Saved. Your website updates within the hour. (Instant updates need GitHub/Claude Code connected in claude.ai Settings → Connectors.)', 8000);
+    else note('Saved. Your student website updates within the hour.');
+  });
+}
 async function savePage(nextView, okMsg, onOk){
   if (saving) return; saving = true;
   if (!CAP.artifact) { saving=false; toast('Saving works only when you open FLIPSEED in Claude as its owner.', 4000); return; }
   var html = buildHtml();
   if (html.length > MAX_BYTES - 200000) { saving=false; toast('FLIPSEED is full. Delete an old activity or use fewer uploaded photos, then save again.', 5000); return; }
-  ssSet('fs:return', JSON.stringify({view:nextView, msg:okMsg}));
+  ssSet('fs:return', JSON.stringify({view:nextView, msg:okMsg, sync:true}));
   showSaving();
   if (onOk) onOk();
   try {
@@ -2235,6 +2257,7 @@ function routeFromHash(){
   var c = (location.hash||'').replace('#','');
   if (c === 'results') return {name:'results'};
   var a = c && findByCode(c);
+  if (!a && c && /^[a-z0-9]{3,6}$/i.test(c)) return {name:'home', missing:c};
   return a ? {name:'hub', id:a.id} : null;
 }
 setTimeout(flushTrack, 1500);
@@ -2245,19 +2268,20 @@ window.addEventListener('hashchange', function(){ var r = routeFromHash(); if (r
 
 (async function initCaps(){
   if (!window.claude || !window.claude.use) return;
-  var names = ['user','artifact','sample','downloads'];
+  var names = ['user','artifact','sample','downloads','mcp'];
   var got = await Promise.all(names.map(function(n){ return window.claude.use(n).catch(function(){return null}); }));
-  CAP.user = got[0]; CAP.artifact = got[1]; CAP.sample = got[2]; CAP.downloads = got[3];
+  CAP.user = got[0]; CAP.artifact = got[1]; CAP.sample = got[2]; CAP.downloads = got[3]; CAP.mcp = got[4];
   var edit = false;
   try { edit = CAP.user ? !!(await CAP.user.canEdit()) : false; } catch(e){}
   if (!edit) { CAP.sample = null; return; }
   IS_TEACHER = true;
   var ret = null; try { ret = JSON.parse(ssGet('fs:return')); } catch(e){}
   ssDel('fs:return');
-  if (ret && ret.view) { go(ret.view); if (ret.msg) toast(ret.msg); }
+  if (ret && ret.view) { go(ret.view); if (ret.sync && isSiteLink()) syncWebsite(); else if (ret.msg) toast(ret.msg); }
   else if (!start) go({name:'studio'});
   else render();
 })();
 })();
 </script>
+
 </body></html>
