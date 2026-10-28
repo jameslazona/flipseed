@@ -1588,7 +1588,7 @@ function sGame(w){
         api.extraDone ? api.extraDone() : null,
         h('div',{class:'row', style:'justify-content:center'},
           h('button',{class:'btn', onclick:function(){go(view)}}, t('playagain')),
-          nx ? h('button',{class:'btn primary', onclick:function(){go({name:'game', id:a.id, g:nx.k})}}, t('next')+': '+(LANG==='vi'?nx.vi:nx.en)+' →')
+          nx ? h('button',{class:'btn primary', onclick:function(){go({name:'game', id:a.id, g:nx.k})}}, nx.k==='cquiz' ? (LANG==='vi' ? 'Tiếp theo: Làm Câu đố kiến thức và nhận Giấy chứng nhận →' : 'Next: Do the Concept Quiz and get your Certificate →') : t('next')+': '+(LANG==='vi'?nx.vi:nx.en)+' →')
              : h('button',{class:'btn sun', onclick:function(){go({name:'cert', id:a.id})}}, I('medal'), t('cert')),
           extraGames(a).length && g.k!=='challenge' && !nx ? h('button',{class:'btn', onclick:function(){go({name:'game', id:a.id, g:'challenge'})}}, I('trophy'), LANG==='vi'?'Thử thách siêu cấp':'Super Challenge') : null,
           h('button',{class:'btn ghost', onclick:function(){go({name:'hub', id:a.id})}}, t('menu')))
