@@ -1,4 +1,3 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>FLIPSEED</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800&display=swap">
@@ -92,6 +91,44 @@ a{color:var(--sky)}
 @media (max-width:560px){.hero-logo{flex-basis:auto;width:min(230px,70%);margin:0 auto}}
 [hidden]{display:none!important}
 .linkstrip{margin-top:4px}
+.cp-title{max-width:760px;margin:0 auto 14px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center}
+.cp-chap{display:inline-block;padding:4px 14px;border-radius:999px;background:var(--sun);color:var(--on-sun);font-family:var(--f-display);font-weight:800;letter-spacing:.04em;border:3px solid #14301e;box-shadow:3px 3px 0 #14301e;transform:rotate(-2deg)}
+.cp-title-text{font-family:var(--f-display);font-weight:800;font-size:clamp(1.5rem,5vw,2.2rem);line-height:1.1;color:var(--leaf);text-shadow:0 2px 0 var(--sheen),0 3px 0 var(--leaf-depth)}
+.comic{max-width:760px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,330px),1fr));gap:18px}
+.cpanel{--line-ink:#14301e;position:relative;display:flex;flex-direction:column;padding:14px 14px 0;min-height:250px;border:4px solid var(--line-ink);border-radius:14px;overflow:hidden;
+  background:radial-gradient(circle,rgba(0,0,0,.07) 1.4px,transparent 1.6px) 0 0/12px 12px,linear-gradient(180deg,#fff,var(--tint));box-shadow:5px 6px 0 var(--line-ink);
+  transform:rotate(var(--tilt)) scale(.6);opacity:0;transition:transform .45s cubic-bezier(.3,1.6,.5,1),opacity .25s}
+.cpanel.in{transform:rotate(var(--tilt)) scale(1);opacity:1}
+.cp-num{position:absolute;left:0;top:0;padding:1px 10px;background:#14301e;color:#fff;font-family:var(--f-display);font-weight:800;border-bottom-right-radius:10px}
+.cp-bubble{position:relative;margin:14px 0 16px;padding:12px 16px;border:3px solid #14301e;border-radius:22px;background:#fff;color:#14301e;text-align:left;cursor:pointer;font:inherit;box-shadow:2px 3px 0 rgba(0,0,0,.15)}
+.cp-bubble::before,.cp-bubble::after{content:"";position:absolute;width:0;height:0;border-style:solid;border-color:transparent}
+.cp-bubble::before{bottom:-19px;border-width:18px 10px 0 10px;border-top-color:#14301e}
+.cp-bubble::after{bottom:-13px;border-width:13px 7px 0 7px;border-top-color:#fff}
+.cp-bubble.kid::before{left:30px}.cp-bubble.kid::after{left:33px}
+.cp-bubble.seed::before{right:30px}.cp-bubble.seed::after{right:33px}
+.cp-say{font-family:var(--f-display);font-weight:700;font-size:clamp(1.12rem,3.6vw,1.3rem);line-height:1.25}
+.cp-say .vi-line{color:#7a55c9}
+.cp-stage{flex:1;display:flex;align-items:flex-end;justify-content:space-between;gap:8px;min-height:110px}
+.cpanel.kid .cp-stage{flex-direction:row-reverse}
+.cp-scene{flex:1;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px;align-self:center}
+.cp-emo{font-size:clamp(2.6rem,9vw,3.4rem);line-height:1;filter:drop-shadow(0 6px 4px rgba(0,0,0,.25));animation:cpbob 2.4s ease-in-out infinite}
+@keyframes cpbob{50%{transform:translateY(-8px) rotate(4deg)}}
+.cp-who{display:flex;flex-direction:column;align-items:center;flex:none}
+.cp-face{width:96px;height:96px;filter:drop-shadow(0 6px 4px rgba(0,0,0,.25));animation:cptalk 1.1s ease-in-out 2}
+@keyframes cptalk{25%{transform:translateY(-6px) rotate(-4deg)}75%{transform:translateY(-3px) rotate(3deg)}}
+.cp-name{margin:-6px 0 8px;padding:0 10px;border-radius:999px;background:#14301e;color:#fff;font-family:var(--f-display);font-weight:800;font-size:.85rem;position:relative}
+.cp-more{display:flex;margin:20px auto 4px;font-size:1.15rem;animation:cpnudge 1.6s ease-in-out infinite}
+@keyframes cpnudge{50%{transform:translateX(6px)}}
+.cp-recap{max-width:620px;margin:24px auto 14px;padding:18px;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;box-shadow:inset 0 0 0 3px var(--sun),0 6px 0 var(--sun-depth),0 20px 30px -18px var(--drop)}
+.cp-recap-head{display:flex;align-items:center;gap:8px;font-family:var(--f-display);font-weight:800;font-size:1.3rem;color:var(--sun-depth)}
+.cp-recap-img{max-width:min(240px,80%);border-radius:14px}
+.ce-box{display:flex;flex-direction:column;gap:10px;padding:12px;border-radius:18px;background:var(--surface-2);box-shadow:inset 0 3px 8px -5px var(--drop)}
+.ce-row{display:grid;grid-template-columns:52px 1fr auto;gap:10px;align-items:center;padding:8px;border-radius:14px;background:var(--surface)}
+.ce-face{width:52px;height:52px}
+.ce-fields{display:flex;flex-direction:column;gap:6px;min-width:0}
+.ce-fields .inp.ce-who{width:auto;flex:0 1 auto;min-height:40px;padding:4px 10px}
+.ce-fields .inp.ce-scene{width:120px;flex:0 1 120px;min-height:40px}
+@media (max-width:560px){.ce-row{grid-template-columns:40px 1fr}.ce-row .wtools{grid-column:1/-1;justify-content:flex-end}.ce-face{width:40px;height:40px}}
 .vi-line{display:block;font-size:.86em;font-weight:700;color:var(--plum);margin-top:4px;font-family:var(--f-body)}
 .lcard{max-width:620px;margin:0 auto;padding:22px;display:flex;flex-direction:column;gap:12px;align-items:center;text-align:center}
 .lc-pic{width:min(170px,48%)}
@@ -640,17 +677,17 @@ function pickVoice(){
     return en.find(function(v){ return /^en[-_]us/i.test(v.lang) && !MALE_RE.test(v.name); }) || en.find(function(v){ return /^en[-_]us/i.test(v.lang); }) || en[0] || null;
   } catch(e){ return null; }
 }
-function speak(text){
+function speak(text, pitch){
   var wait = 600 - (Date.now() - lastSnd);
-  if (wait > 0) { setTimeout(function(){ speakNow(text); }, wait); return; }
-  speakNow(text);
+  if (wait > 0) { setTimeout(function(){ speakNow(text, pitch); }, wait); return; }
+  speakNow(text, pitch);
 }
-function speakNow(text){
+function speakNow(text, pitch){
   try {
     var s = window.speechSynthesis; if (!s) return;
     s.cancel();
     var u = new SpeechSynthesisUtterance(text);
-    u.lang = 'en-US'; u.rate = slowTalk ? 0.65 : 0.88; u.pitch = 1.05;
+    u.lang = 'en-US'; u.rate = slowTalk ? 0.65 : 0.88; u.pitch = pitch || 1.05;
     chosenVoice = chosenVoice || pickVoice();
     if (chosenVoice) { u.voice = chosenVoice; u.lang = chosenVoice.lang; }
     s.speak(u);
@@ -879,7 +916,7 @@ function topBar(student){
 
 /* ---------- routing ---------- */
 function go(v){ if (['studio','create','share','edit'].indexOf(v.name)>=0) PREVIEW = null; view = v; if (window.speechSynthesis) try{speechSynthesis.cancel()}catch(e){}; render(); window.scrollTo(0,0); }
-var BUILD = 'Update 28 Oct · concept quiz · locked links';
+var BUILD = 'Update 28 Oct · comic big ideas';
 var TRACK_CODE = "/* FLIPSEED student tracking\n   Paste this into your Google Sheet: Extensions \u2192 Apps Script.\n   Then Deploy \u2192 New deployment \u2192 Web app (Execute as: Me, Who has access: Anyone).\n\n   TEACHER KEY: you type this key on your website's Results page (\u2026/flipseed/#results).\n   Keep it private. Only someone with this key can see student results. */\nvar TEACHER_KEY = '__TEACHER_KEY__';\n\nvar LOG = 'Activity log';\nvar SUM = 'Students';\nvar LOG_HEAD = ['Time', 'Student', 'Class', 'Activity', 'Code', 'What happened', 'Game', 'Stars', 'Mistakes', 'Hints used', 'Score', 'Seconds', 'Device'];\nvar SUM_HEAD = ['Student', 'Class', 'Activity', 'Code', 'Games finished', 'Which games', 'Stars', 'Best challenge score', 'Certificate', 'First seen', 'Last active', 'Key', 'Data'];\nvar WHAT = { open: 'Opened the activity', game: 'Finished a game', challenge: 'Super Challenge', cert: 'Got the certificate', test: 'Test' };\n\nfunction doPost(e) {\n  var lock = LockService.getScriptLock();\n  lock.waitLock(25000);\n  try {\n    var body = JSON.parse((e && e.postData && e.postData.contents) || '[]');\n    var list = Array.isArray(body) ? body : [body];\n    var ss = SpreadsheetApp.getActiveSpreadsheet();\n    setup_(ss);\n    list.slice(0, 50).forEach(function (ev) { record_(ss, ev); });\n    return ContentService.createTextOutput('ok');\n  } catch (err) {\n    return ContentService.createTextOutput('error: ' + err);\n  } finally {\n    lock.releaseLock();\n  }\n}\n\nfunction doGet(e) {\n  if (e && e.parameter && e.parameter.action === 'results') return results_(e.parameter);\n  var ss = SpreadsheetApp.getActiveSpreadsheet();\n  var msg = 'FLIPSEED tracking is working.';\n  var lock = LockService.getScriptLock();\n  lock.waitLock(25000);\n  try {\n    setup_(ss);\n    if (e && e.parameter && e.parameter.test) {\n      record_(ss, { type: 'test', name: 'Test student', cls: 'Test', code: 'test', title: 'Test from the teacher', dev: 'teacher' });\n      msg += ' A test row was added to your sheet.';\n    }\n  } finally {\n    lock.releaseLock();\n  }\n  var html = '<div style=\"font-family:Arial,sans-serif;padding:24px;max-width:540px\">' +\n    '<h2 style=\"color:#23864f\">&#10004; ' + msg + '</h2>' +\n    '<p><a href=\"' + ss.getUrl() + '\" target=\"_blank\" style=\"font-size:18px\">Open your FLIPSEED results sheet</a></p></div>';\n  return HtmlService.createHtmlOutput(html).setTitle('FLIPSEED tracking');\n}\n\nfunction results_(p) {\n  var out;\n  if (!TEACHER_KEY || TEACHER_KEY.indexOf('__') === 0 || String(p.key || '') !== TEACHER_KEY) {\n    out = { ok: false, error: 'key' };\n  } else {\n    var ss = SpreadsheetApp.getActiveSpreadsheet();\n    setup_(ss);\n    var sum = ss.getSheetByName(SUM), log = ss.getSheetByName(LOG);\n    var students = [], events = [];\n    if (sum.getLastRow() > 1) {\n      sum.getRange(2, 1, sum.getLastRow() - 1, SUM_HEAD.length).getValues().forEach(function (r) {\n        var d = {}; try { d = JSON.parse(r[12] || '{}'); } catch (x) {}\n        students.push({ name: r[0], cls: r[1], title: r[2], code: r[3], games: d.games || {}, stars: r[6],\n          best: r[7], cert: r[8] === 'Yes', first: iso_(r[9]), last: iso_(r[10]) });\n      });\n    }\n    var n = log.getLastRow() - 1;\n    if (n > 0) {\n      var take = Math.min(n, 2000);\n      log.getRange(log.getLastRow() - take + 1, 1, take, LOG_HEAD.length).getValues().forEach(function (r) {\n        events.push({ time: iso_(r[0]), name: r[1], cls: r[2], title: r[3], code: r[4], what: r[5], game: r[6],\n          stars: r[7], mistakes: r[8], hints: r[9], score: r[10], secs: r[11] });\n      });\n    }\n    out = { ok: true, sheet: ss.getUrl(), now: new Date().toISOString(), students: students, events: events };\n  }\n  var json = JSON.stringify(out);\n  if (p.callback && /^[A-Za-z_$][\\w$]{0,40}$/.test(p.callback)) {\n    return ContentService.createTextOutput(p.callback + '(' + json + ')').setMimeType(ContentService.MimeType.JAVASCRIPT);\n  }\n  return ContentService.createTextOutput(json).setMimeType(ContentService.MimeType.JSON);\n}\n\nfunction iso_(v) {\n  return v instanceof Date ? v.toISOString() : (v ? String(v) : '');\n}\n\nfunction clean_(v, n) {\n  v = String(v == null ? '' : v).replace(/[\\u0000-\\u001f]/g, ' ').replace(/\\s+/g, ' ').trim().slice(0, n || 80);\n  return /^[=+\\-@]/.test(v) ? \"'\" + v : v;\n}\n\nfunction num_(v) {\n  v = Number(v);\n  return isFinite(v) ? v : '';\n}\n\nfunction record_(ss, ev) {\n  if (!ev || !ev.name || !ev.code) return;\n  var now = new Date();\n  var name = clean_(ev.name, 40), cls = clean_(ev.cls, 20), code = clean_(ev.code, 10);\n  var title = clean_(ev.title, 80), dev = clean_(ev.dev, 40), game = clean_(ev.game, 40);\n  var type = WHAT[ev.type] ? ev.type : 'game';\n\n  ss.getSheetByName(LOG).appendRow([now, name, cls, title, code, WHAT[type], game,\n    num_(ev.stars), num_(ev.mistakes), num_(ev.hints), num_(ev.score), num_(ev.secs), dev]);\n  if (type === 'test') return;\n\n  var sh = ss.getSheetByName(SUM);\n  var key = (name.toLowerCase() + '|' + cls.toLowerCase() + '|' + code.toLowerCase()).slice(0, 120);\n  var keyCol = SUM_HEAD.indexOf('Key') + 1;\n  var rows = Math.max(1, sh.getLastRow() - 1);\n  var found = sh.getRange(2, keyCol, rows, 1).createTextFinder(key).matchEntireCell(true).findNext();\n  var row, data;\n  if (found) {\n    row = found.getRow();\n    try { data = JSON.parse(sh.getRange(row, keyCol + 1).getValue() || '{}'); } catch (x) { data = {}; }\n  } else {\n    row = sh.getLastRow() + 1;\n    data = {};\n  }\n  data.games = data.games || {};\n  data.first = data.first || now.toISOString();\n  if (type === 'game' && game) data.games[game] = Math.max(data.games[game] || 0, Number(ev.stars) || 0);\n  if (type === 'challenge') data.best = Math.max(data.best || 0, Number(ev.score) || 0);\n  if (type === 'cert') data.cert = true;\n\n  var names = Object.keys(data.games);\n  var stars = names.reduce(function (s, k) { return s + (data.games[k] || 0); }, 0);\n  sh.getRange(row, 1, 1, SUM_HEAD.length).setValues([[\n    name, cls, title, code, names.length, names.join(', '), stars,\n    data.best || '', data.cert ? 'Yes' : '', new Date(data.first), now, key, JSON.stringify(data)\n  ]]);\n}\n\nfunction setup_(ss) {\n  var log = ss.getSheetByName(LOG);\n  if (!log) {\n    var first = ss.getSheets()[0];\n    log = (ss.getSheets().length === 1 && first.getLastRow() === 0) ? first.setName(LOG) : ss.insertSheet(LOG);\n    head_(log, LOG_HEAD);\n    log.getRange('A:A').setNumberFormat('dd/mm/yyyy hh:mm');\n  }\n  var sum = ss.getSheetByName(SUM);\n  if (!sum) {\n    sum = ss.insertSheet(SUM, 0);\n    head_(sum, SUM_HEAD);\n    sum.getRange('J:K').setNumberFormat('dd/mm/yyyy hh:mm');\n    sum.hideColumns(SUM_HEAD.indexOf('Key') + 1, 2);\n  }\n}\n\nfunction head_(sh, cols) {\n  sh.getRange(1, 1, 1, cols.length).setValues([cols])\n    .setFontWeight('bold').setBackground('#23864f').setFontColor('#ffffff');\n  sh.setFrozenRows(1);\n}\n";
 function student(){ try { var s = JSON.parse(lsGet('fs:student')); return s && s.name ? s : null; } catch(e){ return null; } }
 function devId(){ var d = lsGet('fs:dev'); if (!d) { d = Math.random().toString(36).slice(2,10) + Date.now().toString(36).slice(-4); lsSet('fs:dev', d); } return d; }
@@ -1345,30 +1382,97 @@ function quizThumb(a){
   return {word: a.title, emoji: c.emoji || '💡', img: c.img || ''};
 }
 
-/* ---- Learn the Ideas: one big-idea card at a time ---- */
+/* ---- Learn the Ideas: every big idea is a short comic with Bin (a curious student) and Seedy (the FLIPSEED seed) ---- */
+var CAST = {kid:{name:'Bin', pitch:1.3}, seed:{name:'Seedy', pitch:1.0}};
+function faceSvg(who, mood){
+  var ink = '#14301e', eyes, mouth;
+  if (mood === 'wow') {
+    eyes = '<ellipse class="eye" cx="40" cy="58" rx="5.5" ry="7.5" fill="'+ink+'"/><ellipse class="eye" cx="60" cy="58" rx="5.5" ry="7.5" fill="'+ink+'"/><circle cx="42" cy="55" r="2" fill="#fff"/><circle cx="62" cy="55" r="2" fill="#fff"/>';
+    mouth = '<ellipse cx="50" cy="76" rx="6" ry="7" fill="#7a2b2b" stroke="'+ink+'" stroke-width="2.5"/>';
+  } else if (mood === 'wonder') {
+    eyes = '<ellipse class="eye" cx="40" cy="59" rx="4.5" ry="6" fill="'+ink+'"/><ellipse class="eye" cx="60" cy="59" rx="4.5" ry="6" fill="'+ink+'"/><path d="M33 47 Q39 43 45 46 M55 44 Q61 39 67 43" fill="none" stroke="'+ink+'" stroke-width="3" stroke-linecap="round"/>';
+    mouth = '<path d="M44 77 Q50 73 56 77" fill="none" stroke="'+ink+'" stroke-width="3" stroke-linecap="round"/>';
+  } else {
+    eyes = '<ellipse class="eye" cx="40" cy="59" rx="4.5" ry="6" fill="'+ink+'"/><ellipse class="eye" cx="60" cy="59" rx="4.5" ry="6" fill="'+ink+'"/><circle cx="41.5" cy="57" r="1.6" fill="#fff"/><circle cx="61.5" cy="57" r="1.6" fill="#fff"/>';
+    mouth = '<path d="M41 72 Q50 82 59 72" fill="#fff" stroke="'+ink+'" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>';
+  }
+  var cheeks = '<circle cx="31" cy="70" r="5" fill="#ff8f8f" opacity=".55"/><circle cx="69" cy="70" r="5" fill="#ff8f8f" opacity=".55"/>';
+  var body;
+  if (who === 'kid') {
+    body = '<path d="M20 100 C20 84 34 78 50 78 C66 78 80 84 80 100Z" fill="#2f7fd6" stroke="'+ink+'" stroke-width="3.5"/>' +
+      '<path d="M40 79 L50 90 L60 79" fill="#fff" stroke="'+ink+'" stroke-width="3" stroke-linejoin="round"/>' +
+      '<circle cx="50" cy="58" r="27" fill="#f6c9a0" stroke="'+ink+'" stroke-width="3.5"/>' +
+      '<circle cx="23" cy="60" r="5" fill="#f6c9a0" stroke="'+ink+'" stroke-width="3"/><circle cx="77" cy="60" r="5" fill="#f6c9a0" stroke="'+ink+'" stroke-width="3"/>' +
+      '<path d="M22 56 C20 32 36 22 52 24 C68 25 80 36 78 56 C72 46 64 42 56 44 C52 38 46 37 40 42 C34 44 27 48 22 56Z" fill="#231c18" stroke="'+ink+'" stroke-width="3" stroke-linejoin="round"/>';
+  } else {
+    body = '<path d="M50 32 C50 20 58 11 72 9 C70 22 62 29 50 32Z" fill="#5cb83a" stroke="'+ink+'" stroke-width="3" stroke-linejoin="round"/>' +
+      '<path d="M50 32 C47 22 39 16 27 16 C30 27 39 31 50 32Z" fill="#8bdc5f" stroke="'+ink+'" stroke-width="3" stroke-linejoin="round"/>' +
+      '<ellipse cx="50" cy="64" rx="31" ry="33" fill="#e8ac5c" stroke="'+ink+'" stroke-width="3.5"/>' +
+      '<ellipse cx="38" cy="48" rx="9" ry="5" fill="#fff" opacity=".5" transform="rotate(-25 38 48)"/>';
+  }
+  return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">' + body + cheeks + eyes + mouth + '</svg>');
+}
+function autoComic(c){
+  var p = [{who:'kid', mood:'wonder', scene:c.emoji || '💡', say:'Seedy, what is this about?', say_vi:'Seedy ơi, bài này nói về điều gì vậy?'},
+    {who:'seed', mood:'happy', scene:c.emoji || '💡', say:c.title, say_vi:c.title_vi || ''},
+    {who:'seed', mood:'happy', scene:'', say:c.text, say_vi:c.text_vi || ''}];
+  if (c.example) p.push({who:'kid', mood:'wow', scene:'', say:'I know! ' + c.example, say_vi:c.example_vi ? 'Mình biết rồi! ' + c.example_vi : ''});
+  return p;
+}
+function comicOf(c){ return (c.comic && c.comic.length) ? c.comic : autoComic(c); }
+function sayAs(text, who){ speak(text, (CAST[who] || CAST.seed).pitch); }
+function comicPanel(a, p, n, i){
+  var who = p.who === 'kid' ? 'kid' : 'seed';
+  var sceneEl = h('div', {class:'cp-scene', 'aria-hidden':'true'}, (String(p.scene || '').match(/\p{Extended_Pictographic}(‍\p{Extended_Pictographic}|️|[\u{1f3fb}-\u{1f3ff}])*/gu) || []).slice(0, 4).map(function(e, k){
+    return h('span', {class:'cp-emo', style:'animation-delay:' + (k * 0.35) + 's'}, e); }));
+  var bubble = h('button', {class:'cp-bubble ' + who, 'aria-label':CAST[who].name + ' says: ' + p.say, onclick:function(){ sayAs(p.say, who); }},
+    bi(a, p.say, p.say_vi, 'cp-say'));
+  return h('div', {class:'cpanel ' + who, style:'--tint:var(--t' + ((i % 6) + 1) + ');--tilt:' + (i % 2 ? '.8deg' : '-.8deg')},
+    h('span', {class:'cp-num'}, String(n)),
+    bubble,
+    h('div', {class:'cp-stage'}, sceneEl,
+      h('div', {class:'cp-who'}, h('img', {src:faceSvg(who, p.mood), alt:'', class:'cp-face'}), h('span', {class:'cp-name'}, CAST[who].name))));
+}
 function gLearn(api){
   var a = api.a, cs = a.concepts || [], i = 0, vi = LANG === 'vi';
   api.setHint(null);
   function draw(){
     api.el.textContent = '';
     if (i >= cs.length) return api.finish();
-    var c = cs[i];
+    var c = cs[i], panels = comicOf(c), shown = 0;
     api.setScore((i + 1) + ' ' + t('of') + ' ' + cs.length);
-    var art = h('div', {class:'pic lc-pic', style:'--tint:var(--t' + ((i % 6) + 1) + ')'},
-      c.img ? h('img', {src:c.img, alt:''}) : h('span', {class:'emo', role:'img', 'aria-label':c.title || ''}, c.emoji || '💡'));
+    var strip = h('div', {class:'comic'});
+    var recap = h('div', {class:'cp-recap clay', hidden:true},
+      h('div', {class:'cp-recap-head'}, I('bulb'), vi ? 'Ghi nhớ' : 'Remember'),
+      c.img ? h('img', {src:c.img, alt:'', class:'cp-recap-img'}) : null,
+      bi(a, c.text, c.text_vi, 'lc-text'),
+      c.example ? h('div', {class:'lc-ex'}, h('span', {class:'lc-ex-tag'}, vi ? 'Ví dụ' : 'Example'), bi(a, c.example, c.example_vi, '')) : null,
+      h('div', {class:'row', style:'justify-content:center'}, sayBtn(c.text + (c.example ? ' ' + c.example : ''))));
+    var more = h('button', {class:'btn sun cp-more', onclick:reveal}, vi ? 'Xem tiếp ▶' : 'What happens next? ▶');
+    var nav = h('div', {class:'row', style:'justify-content:center', hidden:true},
+      h('button', {class:'btn', disabled:i === 0, onclick:function(){ i--; draw(); }}, '← ' + (vi ? 'Trước' : 'Back')),
+      h('button', {class:'btn primary', onclick:function(){ ting(); i++; draw(); }}, I('check'),
+        i === cs.length - 1 ? (vi ? 'Em hiểu rồi!' : 'I understand!') : (vi ? 'Ý tiếp theo' : 'Next big idea') + ' →'));
+    function reveal(){
+      if (shown >= panels.length) return;
+      var p = panels[shown], el = comicPanel(a, p, shown + 1, shown);
+      strip.append(el); shown++;
+      requestAnimationFrame(function(){ el.classList.add('in'); });
+      sayAs(p.say, p.who);
+      if (shown >= panels.length) { more.hidden = true; recap.hidden = false; nav.hidden = false; }
+      else more.textContent = vi ? 'Xem tiếp ▶' : 'What happens next? ▶';
+      setTimeout(function(){ try { (shown >= panels.length ? recap : el).scrollIntoView({behavior:'smooth', block:'nearest'}); } catch(e){} }, 80);
+    }
     api.el.append(
-      h('div', {class:'lcard clay'},
-        h('div', {class:'eyebrow'}, (vi ? 'Ý chính ' : 'Big idea ') + (i + 1)),
-        art,
-        bi(a, c.title, c.title_vi, 'lc-title'),
-        bi(a, c.text, c.text_vi, 'lc-text'),
-        c.example ? h('div', {class:'lc-ex'}, h('span', {class:'lc-ex-tag'}, vi ? 'Ví dụ' : 'Example'), bi(a, c.example, c.example_vi, '')) : null,
-        h('div', {class:'row', style:'justify-content:center'}, sayBtn((c.title || '') + '. ' + (c.text || '') + (c.example ? ' ' + c.example : '')))),
+      h('div', {class:'cp-title'},
+        h('span', {class:'cp-chap'}, (vi ? 'Ý chính ' : 'Big idea ') + (i + 1) + ' / ' + cs.length),
+        bi(a, c.title, c.title_vi, 'cp-title-text')),
+      strip,
+      h('div', {class:'row', style:'justify-content:center'}, more),
+      recap,
       h('div', {class:'dots-row', 'aria-hidden':'true'}, cs.map(function(_, k){ return h('span', {class:'dotp' + (k === i ? ' on' : k < i ? ' done' : '')}); })),
-      h('div', {class:'row', style:'justify-content:center'},
-        h('button', {class:'btn', disabled:i === 0, onclick:function(){ i--; draw(); }}, '← ' + (vi ? 'Trước' : 'Back')),
-        h('button', {class:'btn primary', onclick:function(){ ting(); i++; draw(); }}, I('check'),
-          i === cs.length - 1 ? (vi ? 'Em hiểu rồi!' : 'I understand!') : (vi ? 'Tiếp' : 'Next') + ' →')));
+      nav);
+    reveal();
   }
   draw();
 }
@@ -2274,10 +2378,28 @@ function kindChooser(kind){
 
 function quizLevel(grade){ return +grade <= 2 ? 'A1 (very easy words, very short sentences)' : +grade <= 5 ? 'A1–A2' : 'A2–B1'; }
 
+function normComic(arr, both){
+  return (Array.isArray(arr) ? arr : []).filter(function(p){ return p && p.say; }).slice(0, 6).map(function(p){
+    return {who: p.who === 'kid' ? 'kid' : 'seed', mood: ['happy','wonder','wow'].indexOf(p.mood) >= 0 ? p.mood : 'happy',
+      scene: String(p.scene || '').trim().slice(0, 24), say: String(p.say).trim(), say_vi: both ? String(p.say_vi || '').trim() : ''};
+  });
+}
+var COMIC_RULES = 'Each big idea is taught as a short COMIC STRIP: "comic" is a list of 3 to 5 panels, a friendly conversation between Bin (a curious Vietnamese student, "who":"kid") and Seedy (a cheerful talking seed who is a Science guide, "who":"seed"). ' +
+  'Panel 1: Bin notices something from everyday life in Vietnam or asks a question (make the child curious). Middle panels: Seedy explains the idea in tiny, clear steps, maybe with a quick "try this" or "look!". Last panel: Bin says the idea in his own words or gives his own example, and is happy. ' +
+  'Together the panels must teach everything in the big idea "text", accurately. "say": ONE short line, max 15 easy words. "mood": "wonder", "happy" or "wow". "scene": 1 to 3 emojis that show what is happening in that panel (no text, no faces of Bin or Seedy).';
+function comicRulesVi(both){ return both ? ' Add "say_vi": a natural Vietnamese translation of each line.' : ' "say_vi" is an empty string.'; }
+async function aiComicFor(act, c){
+  var both = act.lang === 'both';
+  var prompt = 'You help a Science teacher in Vietnam (Grade ' + act.grade + ', English level ' + quizLevel(act.grade) + '). Students learn this idea at home before the lesson.\n' +
+    'Big idea: ' + c.title + '\nExplanation: ' + c.text + (c.example ? '\nExample: ' + c.example : '') + '\n' + COMIC_RULES + comicRulesVi(both) +
+    ' Be scientifically accurate.\nReturn ONLY JSON: {"comic":[{"who":"kid","mood":"wonder","scene":"","say":"","say_vi":""}]}';
+  var r = await CAP.sample.json(prompt, {modelTier:'default'});
+  return normComic(r && r.comic, both);
+}
 function normQuiz(res, both){
   var cs = (res && res.concepts || []).filter(function(c){ return c && c.title && c.text; }).slice(0, 8).map(function(c){
     return {id:uid(), title:String(c.title).trim(), text:String(c.text).trim(), example:String(c.example || '').trim(), emoji:String(c.emoji || '💡').trim().slice(0, 8),
-      title_vi: both ? String(c.title_vi || '').trim() : '', text_vi: both ? String(c.text_vi || '').trim() : '', example_vi: both ? String(c.example_vi || '').trim() : '', img:''};
+      title_vi: both ? String(c.title_vi || '').trim() : '', text_vi: both ? String(c.text_vi || '').trim() : '', example_vi: both ? String(c.example_vi || '').trim() : '', img:'', comic: normComic(c.comic, both)};
   });
   var qs = (res && res.questions || []).map(function(q){
     if (!q || !q.q || !Array.isArray(q.options)) return null;
@@ -2301,7 +2423,8 @@ async function extractQuiz(content, grade, topic, count, both){
     'This is a FLIPPED CLASSROOM pre-lesson. Students do it at home BEFORE the teacher teaches the lesson, so it must first TEACH the key concepts simply, then gently check understanding.',
     topic ? 'The teacher says the topic is: ' + topic + '.' : '',
     'From the book pages / lesson below, create:',
-    '1. "concepts": 3 to 6 "big idea" cards covering the main concepts of THIS lesson, in lesson order. Each has "title" (max 6 words), "text" (1 to 3 short, simple sentences that explain the idea, max 40 words), "example" (one everyday example a child knows, max 15 words), "emoji" (one emoji).',
+    '1. "concepts": 3 to 6 "big idea" cards covering the main concepts of THIS lesson, in lesson order. Each has "title" (max 6 words), "text" (1 to 3 short, simple sentences that explain the idea, max 40 words), "example" (one everyday example a child knows, max 15 words), "emoji" (one emoji), and "comic" (see below).',
+    COMIC_RULES + comicRulesVi(both),
     '2. "questions": exactly ' + count + ' questions that check understanding of those concepts. About 3 in 4 are multiple choice with 4 options ("type":"mc"); the rest are true/false ("type":"tf", options exactly ["True","False"]).',
     '   Every question must be answerable from the concept cards alone, because the students have not had the lesson yet. Test understanding (apply, compare, predict, explain why), not only memory. Use simple words. Exactly one clearly correct answer. Wrong options should be common misconceptions, never silly. No "all of the above". Vary the position of the correct answer.',
     '   "answer": index of the correct option (0-based). "explain": 1 to 2 friendly sentences that teach why the answer is right. "concept": index of the concept card the question checks.',
@@ -2309,7 +2432,7 @@ async function extractQuiz(content, grade, topic, count, both){
     '"title": a short activity title (max 6 words).',
     'Be scientifically accurate. Stay within the content of these pages. Do not invent facts.',
     'Return ONLY JSON in this shape:',
-    '{"title":"","concepts":[{"title":"","text":"","example":"","emoji":"","title_vi":"","text_vi":"","example_vi":""}],"questions":[{"type":"mc","q":"","options":["","","",""],"answer":0,"explain":"","concept":0,"q_vi":"","options_vi":[],"explain_vi":""}]}',
+    '{"title":"","concepts":[{"title":"","text":"","example":"","emoji":"","title_vi":"","text_vi":"","example_vi":"","comic":[{"who":"kid","mood":"wonder","scene":"","say":"","say_vi":""}]}],"questions":[{"type":"mc","q":"","options":["","","",""],"answer":0,"explain":"","concept":0,"q_vi":"","options_vi":[],"explain_vi":""}]}',
     '',
     'LESSON CONTENT:',
     text || '(The lesson pages are attached as pictures. Read them carefully, including diagrams, labels and captions.)'
@@ -2321,13 +2444,14 @@ async function extractQuiz(content, grade, topic, count, both){
 
 async function aiTranslateQuiz(act){
   var payload = {
-    concepts: act.concepts.map(function(c){ return {title:c.title, text:c.text, example:c.example}; }),
+    concepts: act.concepts.map(function(c){ return {title:c.title, text:c.text, example:c.example, comic:(c.comic || []).map(function(p){ return p.say; })}; }),
     questions: act.questions.map(function(q){ return {q:q.q, options:q.options, explain:q.explain}; })
   };
   var prompt = 'Translate this children\'s Science lesson material (Grade ' + act.grade + ', Vietnamese students) into natural Vietnamese, as used in Vietnamese Science textbooks. Keep it simple. For "True"/"False" use "Đúng"/"Sai".\n' +
-    'Return ONLY JSON: {"concepts":[{"title_vi":"","text_vi":"","example_vi":""}],"questions":[{"q_vi":"","options_vi":[],"explain_vi":""}]} with the same number and order of items and options.\n\n' + JSON.stringify(payload);
+    'Return ONLY JSON: {"concepts":[{"title_vi":"","text_vi":"","example_vi":"","comic_vi":["one Vietnamese line per comic line"]}],"questions":[{"q_vi":"","options_vi":[],"explain_vi":""}]} with the same number and order of items and options.\n\n' + JSON.stringify(payload);
   var r = await CAP.sample.json(prompt, {modelTier:'default'});
-  (r.concepts || []).forEach(function(v, i){ var c = act.concepts[i]; if (!c || !v) return; c.title_vi = c.title_vi || String(v.title_vi || ''); c.text_vi = c.text_vi || String(v.text_vi || ''); c.example_vi = c.example_vi || String(v.example_vi || ''); });
+  (r.concepts || []).forEach(function(v, i){ var c = act.concepts[i]; if (!c || !v) return; c.title_vi = c.title_vi || String(v.title_vi || ''); c.text_vi = c.text_vi || String(v.text_vi || ''); c.example_vi = c.example_vi || String(v.example_vi || '');
+    (c.comic || []).forEach(function(p, k){ p.say_vi = p.say_vi || String((v.comic_vi || [])[k] || ''); }); });
   (r.questions || []).forEach(function(v, i){ var q = act.questions[i]; if (!q || !v) return; q.q_vi = q.q_vi || String(v.q_vi || ''); q.explain_vi = q.explain_vi || String(v.explain_vi || '');
     var ov = (v.options_vi || []).map(String); q.options_vi = q.options.map(function(_, k){ return (q.options_vi || [])[k] || ov[k] || ''; }); });
 }
@@ -2346,7 +2470,7 @@ async function aiMoreQuestions(act, n){
 }
 
 function blankQuestion(type){ return {id:uid(), type:type || 'mc', q:'', q_vi:'', options: type === 'tf' ? ['True', 'False'] : ['', '', '', ''], options_vi: type === 'tf' ? ['Đúng', 'Sai'] : ['', '', '', ''], answer:0, explain:'', explain_vi:'', concept:0, img:''}; }
-function blankConcept(){ return {id:uid(), title:'', text:'', example:'', emoji:'💡', title_vi:'', text_vi:'', example_vi:'', img:''}; }
+function blankConcept(){ return {id:uid(), title:'', text:'', example:'', emoji:'💡', title_vi:'', text_vi:'', example_vi:'', img:'', comic:[]}; }
 
 function tEditQuiz(w, act){
   w.append(topBar(false));
@@ -2362,7 +2486,7 @@ function tEditQuiz(w, act){
   var langSeg = h('div', {class:'seg', role:'group', 'aria-label':'Quiz language'}, [['en', 'English only'], ['both', 'English + Vietnamese']].map(function(o){
     return h('button', {class:act.lang === o[0] ? 'on' : '', onclick:function(){ act.lang = o[0]; touch(); render(); }}, o[1]);
   }));
-  var missingVi = act.lang === 'both' && (act.concepts.some(function(c){ return c.title && !c.title_vi; }) || act.questions.some(function(q){ return q.q && !q.q_vi; }));
+  var missingVi = act.lang === 'both' && (act.concepts.some(function(c){ return (c.title && !c.title_vi) || (c.comic || []).some(function(p){ return p.say && !p.say_vi; }); }) || act.questions.some(function(q){ return q.q && !q.q_vi; }));
   var trMsg = h('span', {class:'small', 'aria-live':'polite'});
   w.append(h('div', {class:'panel stack'},
     h('div', {class:'grid2'},
@@ -2374,7 +2498,7 @@ function tEditQuiz(w, act){
         try { await aiTranslateQuiz(act); touch(); render(); toast('Vietnamese added. Please check it.'); }
         catch(e){ trMsg.textContent = friendlyErr(e); b.disabled = false; }
       }}, I('globe'), 'Add the missing Vietnamese with AI') : null, trMsg)),
-    h('p', {class:'small muted'}, 'Students first read the big ideas, then answer the questions. After every answer they see the explanation, so the quiz teaches as it checks.')));
+    h('p', {class:'small muted'}, 'Students first read each big idea as a short comic (Bin asks, Seedy explains), then answer the questions. After every answer they see the explanation, so the quiz teaches as it checks.')));
 
   // concepts
   var cBox = h('div', {class:'stack'});
@@ -2415,8 +2539,40 @@ function tEditQuiz(w, act){
       fld(c, 'text', 'Explanation (1–3 simple sentences)', true, 'cx-' + c.id),
       both ? fld(c, 'text_vi', 'Explanation in Vietnamese', true, 'cxv-' + c.id) : null,
       h('div', {class:'qe-grid'}, fld(c, 'example', 'Everyday example', false, 'cex-' + c.id), both ? fld(c, 'example_vi', 'Example in Vietnamese', false, 'cexv-' + c.id) : null),
-      imgTools(c)));
+      imgTools(c),
+      comicEditor(c)));
   });
+  function comicEditor(c){
+    c.comic = c.comic || [];
+    var msg = h('span', {class:'small', 'aria-live':'polite'});
+    var list = h('div', {class:'stack', style:'gap:8px'});
+    c.comic.forEach(function(p, k){
+      var whoSel = h('select', {class:'inp ce-who', 'aria-label':'Who talks in panel ' + (k + 1), onchange:function(){ p.who = whoSel.value; touch(); render(); }},
+        [['kid', 'Bin (student)'], ['seed', 'Seedy (seed)']].map(function(o){ return h('option', {value:o[0], selected:p.who === o[0]}, o[1]); }));
+      var moodSel = h('select', {class:'inp ce-who', 'aria-label':'Face in panel ' + (k + 1), onchange:function(){ p.mood = moodSel.value; touch(); render(); }},
+        [['happy', '😊 happy'], ['wonder', '🤔 wondering'], ['wow', '😮 wow']].map(function(o){ return h('option', {value:o[0], selected:(p.mood || 'happy') === o[0]}, o[1]); }));
+      var sc = h('input', {class:'inp ce-scene', value:p.scene || '', placeholder:'Emojis', 'aria-label':'Picture emojis for panel ' + (k + 1), oninput:function(){ p.scene = sc.value; touch(); }});
+      var say = h('input', {class:'inp', value:p.say || '', placeholder:'What they say', 'aria-label':'Line in panel ' + (k + 1), oninput:function(){ p.say = say.value; touch(); }});
+      var sv = both ? h('input', {class:'inp', value:p.say_vi || '', placeholder:'Vietnamese', 'aria-label':'Vietnamese line in panel ' + (k + 1), oninput:function(){ p.say_vi = sv.value; touch(); }}) : null;
+      list.append(h('div', {class:'ce-row'},
+        h('img', {src:faceSvg(p.who === 'kid' ? 'kid' : 'seed', p.mood), alt:'', class:'ce-face'}),
+        h('div', {class:'ce-fields'}, h('div', {class:'row', style:'gap:6px'}, whoSel, moodSel, sc), say, sv),
+        h('div', {class:'wtools'},
+          h('button', {class:'btn ghost sm', 'aria-label':'Move panel up', disabled:k === 0, onclick:function(){ c.comic.splice(k - 1, 0, c.comic.splice(k, 1)[0]); touch(); render(); }}, '↑'),
+          h('button', {class:'btn ghost sm', 'aria-label':'Remove panel', onclick:function(){ c.comic.splice(k, 1); touch(); render(); }}, '✕'))));
+    });
+    return h('div', {class:'ce-box'},
+      h('div', {class:'row', style:'justify-content:space-between'},
+        h('strong', {class:'row', style:'gap:6px'}, '💬 Comic strip', h('span', {class:'small muted', style:'font-weight:700'}, c.comic.length ? c.comic.length + ' panels' : 'none yet: students see a simple comic made from the text above')),
+        h('div', {class:'row', style:'gap:6px'},
+          CAP.sample ? h('button', {class:'btn sm sun', onclick:async function(){
+            var b = this; b.disabled = true; msg.textContent = 'Writing the comic…';
+            try { var cm = await aiComicFor(act, c); if (!cm.length) throw new Error('The AI did not return a comic. Try again.'); c.comic = cm; touch(); render(); toast('New comic written. Please check it.'); }
+            catch(e){ msg.textContent = friendlyErr(e); b.disabled = false; }
+          }}, I('sparkles'), c.comic.length ? 'AI: write it again' : 'AI: write the comic') : null,
+          c.comic.length < 6 ? h('button', {class:'btn sm', onclick:function(){ var last = c.comic[c.comic.length - 1]; c.comic.push({who: last && last.who === 'seed' ? 'kid' : 'seed', mood:'happy', scene:'', say:'', say_vi:''}); touch(); render(); }}, '+ Add a panel') : null)),
+      msg, list);
+  }
 
   // questions
   var qBox = h('div', {class:'stack'});
@@ -2464,6 +2620,7 @@ function tEditQuiz(w, act){
   var err = h('span', {class:'small', 'aria-live':'polite', style:'color:var(--coral);font-weight:800'});
   function commit(status){
     act.concepts = act.concepts.filter(function(c){ return (c.title || '').trim() && (c.text || '').trim(); });
+    act.concepts.forEach(function(c){ c.comic = (c.comic || []).filter(function(p){ return (p.say || '').trim(); }); });
     var bad = act.questions.findIndex(function(q){ return !(q.q || '').trim() || q.options.filter(function(o){ return String(o).trim(); }).length < q.options.length || q.options.length < 2; });
     if (!act.concepts.length) { err.textContent = 'Add at least 1 big idea with a title and explanation.'; return; }
     if (act.questions.length < 2) { err.textContent = 'Add at least 2 questions.'; return; }
@@ -2477,7 +2634,7 @@ function tEditQuiz(w, act){
   }
   w.append(h('div', {class:'bar'}, err,
     h('button', {class:'btn ghost', onclick:function(){ go({name:'studio'}); }}, 'Back'),
-    h('button', {class:'btn', onclick:function(){ var copyAct = JSON.parse(JSON.stringify(act)); go({name:'hub', id:act.id}); PREVIEW = copyAct; render(); }}, I('eyes'), 'Preview'),
+    h('button', {class:'btn', onclick:function(){ PREVIEW = JSON.parse(JSON.stringify(act)); go({name:'hub', id:act.id}); }}, I('eyes'), 'Preview'),
     h('button', {class:'btn', onclick:function(){ commit('draft'); }}, I('save'), act.status === 'published' ? 'Save and hide from students' : 'Save draft'),
     h('button', {class:'btn primary', onclick:function(){ commit('published'); }}, I('rocket'), act.status === 'published' ? 'Save changes' : 'Publish for students')));
 }
@@ -2707,7 +2864,7 @@ function tEdit(w){
   }
   w.append(h('div',{class:'bar'}, err,
     h('button',{class:'btn ghost', onclick:function(){ go({name:'studio'}); }}, 'Back'),
-    h('button',{class:'btn', onclick:function(){ var copyAct = JSON.parse(JSON.stringify(act)); go({name:'hub', id:act.id}); PREVIEW = copyAct; render(); }}, I('eyes'), 'Preview'),
+    h('button',{class:'btn', onclick:function(){ PREVIEW = JSON.parse(JSON.stringify(act)); go({name:'hub', id:act.id}); }}, I('eyes'), 'Preview'),
     h('button',{class:'btn', onclick:function(){ commit('draft'); }}, I('save'), act.status==='published' ? 'Save and hide from students' : 'Save draft'),
     h('button',{class:'btn primary', onclick:function(){ commit('published'); }}, I('rocket'), act.status==='published' ? 'Save changes' : 'Publish for students')));
 }
@@ -2842,4 +2999,3 @@ window.addEventListener('hashchange', function(){ var r = routeFromHash(); if (r
 })();
 })();
 </script>
-</body></html>
