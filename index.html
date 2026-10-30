@@ -1,4 +1,3 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>FLIPSEED</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800&display=swap">
@@ -92,6 +91,20 @@ a{color:var(--sky)}
 @media (max-width:560px){.hero-logo{flex-basis:auto;width:min(230px,70%);margin:0 auto}}
 [hidden]{display:none!important}
 .linkstrip{margin-top:4px}
+.ps-many{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start}
+.ps.st{flex-direction:column;align-items:center;gap:4px;flex-wrap:nowrap}
+.ps.st .ps-tools{flex-wrap:nowrap;justify-content:center}
+.ps.st .ps-b{min-height:32px;padding:2px 5px}
+.pic-row{display:grid;gap:10px;width:100%;max-width:640px;margin:0 auto}
+.pic-row.n1{grid-template-columns:minmax(0,420px);justify-content:center}
+.pic-row.n2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.pic-row.n3{grid-template-columns:repeat(auto-fit,minmax(130px,1fr))}
+.pic-tap{border:0;padding:0;background:#fff;border-radius:16px;overflow:hidden;cursor:zoom-in;box-shadow:0 4px 0 var(--depth)}
+.pic-tap img{display:block;width:100%;height:100%;max-height:260px;object-fit:contain}
+.pic-row.n3 .pic-tap img{height:150px}
+.zoom-back{position:fixed;inset:0;z-index:70;background:rgba(8,20,12,.85);display:grid;place-items:center;padding:16px;cursor:zoom-out}
+.zoom-back img{max-width:100%;max-height:calc(100vh - 32px);border-radius:16px;background:#fff}
+.zoom-x{position:absolute;top:16px;right:16px}
 .ps{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .ps.sm{gap:4px;flex-wrap:nowrap}
 .ps-tile{position:relative;flex:none;width:110px;height:110px;border-radius:16px;display:grid;place-items:center;overflow:hidden;cursor:pointer;background:var(--surface-2);box-shadow:inset 0 3px 6px -3px var(--drop);outline:3px solid transparent;outline-offset:2px;transition:outline-color .15s}
@@ -944,7 +957,7 @@ function topBar(student){
 
 /* ---------- routing ---------- */
 function go(v){ if (['studio','create','share','edit'].indexOf(v.name)>=0) PREVIEW = null; view = v; if (window.speechSynthesis) try{speechSynthesis.cancel()}catch(e){}; render(); window.scrollTo(0,0); }
-var BUILD = 'Update 30 Oct · pictures everywhere';
+var BUILD = 'Update 30 Oct · several pictures';
 var TRACK_CODE = "/* FLIPSEED student tracking\n   Paste this into your Google Sheet: Extensions \u2192 Apps Script.\n   Then Deploy \u2192 New deployment \u2192 Web app (Execute as: Me, Who has access: Anyone).\n\n   TEACHER KEY: you type this key on your website's Results page (\u2026/flipseed/#results).\n   Keep it private. Only someone with this key can see student results. */\nvar TEACHER_KEY = '__TEACHER_KEY__';\n\nvar LOG = 'Activity log';\nvar SUM = 'Students';\nvar LOG_HEAD = ['Time', 'Student', 'Class', 'Activity', 'Code', 'What happened', 'Game', 'Stars', 'Mistakes', 'Hints used', 'Score', 'Seconds', 'Device'];\nvar SUM_HEAD = ['Student', 'Class', 'Activity', 'Code', 'Games finished', 'Which games', 'Stars', 'Best challenge score', 'Certificate', 'First seen', 'Last active', 'Key', 'Data'];\nvar WHAT = { open: 'Opened the activity', game: 'Finished a game', challenge: 'Super Challenge', cert: 'Got the certificate', test: 'Test' };\n\nfunction doPost(e) {\n  var lock = LockService.getScriptLock();\n  lock.waitLock(25000);\n  try {\n    var body = JSON.parse((e && e.postData && e.postData.contents) || '[]');\n    var list = Array.isArray(body) ? body : [body];\n    var ss = SpreadsheetApp.getActiveSpreadsheet();\n    setup_(ss);\n    list.slice(0, 50).forEach(function (ev) { record_(ss, ev); });\n    return ContentService.createTextOutput('ok');\n  } catch (err) {\n    return ContentService.createTextOutput('error: ' + err);\n  } finally {\n    lock.releaseLock();\n  }\n}\n\nfunction doGet(e) {\n  if (e && e.parameter && e.parameter.action === 'results') return results_(e.parameter);\n  var ss = SpreadsheetApp.getActiveSpreadsheet();\n  var msg = 'FLIPSEED tracking is working.';\n  var lock = LockService.getScriptLock();\n  lock.waitLock(25000);\n  try {\n    setup_(ss);\n    if (e && e.parameter && e.parameter.test) {\n      record_(ss, { type: 'test', name: 'Test student', cls: 'Test', code: 'test', title: 'Test from the teacher', dev: 'teacher' });\n      msg += ' A test row was added to your sheet.';\n    }\n  } finally {\n    lock.releaseLock();\n  }\n  var html = '<div style=\"font-family:Arial,sans-serif;padding:24px;max-width:540px\">' +\n    '<h2 style=\"color:#23864f\">&#10004; ' + msg + '</h2>' +\n    '<p><a href=\"' + ss.getUrl() + '\" target=\"_blank\" style=\"font-size:18px\">Open your FLIPSEED results sheet</a></p></div>';\n  return HtmlService.createHtmlOutput(html).setTitle('FLIPSEED tracking');\n}\n\nfunction results_(p) {\n  var out;\n  if (!TEACHER_KEY || TEACHER_KEY.indexOf('__') === 0 || String(p.key || '') !== TEACHER_KEY) {\n    out = { ok: false, error: 'key' };\n  } else {\n    var ss = SpreadsheetApp.getActiveSpreadsheet();\n    setup_(ss);\n    var sum = ss.getSheetByName(SUM), log = ss.getSheetByName(LOG);\n    var students = [], events = [];\n    if (sum.getLastRow() > 1) {\n      sum.getRange(2, 1, sum.getLastRow() - 1, SUM_HEAD.length).getValues().forEach(function (r) {\n        var d = {}; try { d = JSON.parse(r[12] || '{}'); } catch (x) {}\n        students.push({ name: r[0], cls: r[1], title: r[2], code: r[3], games: d.games || {}, stars: r[6],\n          best: r[7], cert: r[8] === 'Yes', first: iso_(r[9]), last: iso_(r[10]) });\n      });\n    }\n    var n = log.getLastRow() - 1;\n    if (n > 0) {\n      var take = Math.min(n, 2000);\n      log.getRange(log.getLastRow() - take + 1, 1, take, LOG_HEAD.length).getValues().forEach(function (r) {\n        events.push({ time: iso_(r[0]), name: r[1], cls: r[2], title: r[3], code: r[4], what: r[5], game: r[6],\n          stars: r[7], mistakes: r[8], hints: r[9], score: r[10], secs: r[11] });\n      });\n    }\n    out = { ok: true, sheet: ss.getUrl(), now: new Date().toISOString(), students: students, events: events };\n  }\n  var json = JSON.stringify(out);\n  if (p.callback && /^[A-Za-z_$][\\w$]{0,40}$/.test(p.callback)) {\n    return ContentService.createTextOutput(p.callback + '(' + json + ')').setMimeType(ContentService.MimeType.JAVASCRIPT);\n  }\n  return ContentService.createTextOutput(json).setMimeType(ContentService.MimeType.JSON);\n}\n\nfunction iso_(v) {\n  return v instanceof Date ? v.toISOString() : (v ? String(v) : '');\n}\n\nfunction clean_(v, n) {\n  v = String(v == null ? '' : v).replace(/[\\u0000-\\u001f]/g, ' ').replace(/\\s+/g, ' ').trim().slice(0, n || 80);\n  return /^[=+\\-@]/.test(v) ? \"'\" + v : v;\n}\n\nfunction num_(v) {\n  v = Number(v);\n  return isFinite(v) ? v : '';\n}\n\nfunction record_(ss, ev) {\n  if (!ev || !ev.name || !ev.code) return;\n  var now = new Date();\n  var name = clean_(ev.name, 40), cls = clean_(ev.cls, 20), code = clean_(ev.code, 10);\n  var title = clean_(ev.title, 80), dev = clean_(ev.dev, 40), game = clean_(ev.game, 40);\n  var type = WHAT[ev.type] ? ev.type : 'game';\n\n  ss.getSheetByName(LOG).appendRow([now, name, cls, title, code, WHAT[type], game,\n    num_(ev.stars), num_(ev.mistakes), num_(ev.hints), num_(ev.score), num_(ev.secs), dev]);\n  if (type === 'test') return;\n\n  var sh = ss.getSheetByName(SUM);\n  var key = (name.toLowerCase() + '|' + cls.toLowerCase() + '|' + code.toLowerCase()).slice(0, 120);\n  var keyCol = SUM_HEAD.indexOf('Key') + 1;\n  var rows = Math.max(1, sh.getLastRow() - 1);\n  var found = sh.getRange(2, keyCol, rows, 1).createTextFinder(key).matchEntireCell(true).findNext();\n  var row, data;\n  if (found) {\n    row = found.getRow();\n    try { data = JSON.parse(sh.getRange(row, keyCol + 1).getValue() || '{}'); } catch (x) { data = {}; }\n  } else {\n    row = sh.getLastRow() + 1;\n    data = {};\n  }\n  data.games = data.games || {};\n  data.first = data.first || now.toISOString();\n  if (type === 'game' && game) data.games[game] = Math.max(data.games[game] || 0, Number(ev.stars) || 0);\n  if (type === 'challenge') data.best = Math.max(data.best || 0, Number(ev.score) || 0);\n  if (type === 'cert') data.cert = true;\n\n  var names = Object.keys(data.games);\n  var stars = names.reduce(function (s, k) { return s + (data.games[k] || 0); }, 0);\n  sh.getRange(row, 1, 1, SUM_HEAD.length).setValues([[\n    name, cls, title, code, names.length, names.join(', '), stars,\n    data.best || '', data.cert ? 'Yes' : '', new Date(data.first), now, key, JSON.stringify(data)\n  ]]);\n}\n\nfunction setup_(ss) {\n  var log = ss.getSheetByName(LOG);\n  if (!log) {\n    var first = ss.getSheets()[0];\n    log = (ss.getSheets().length === 1 && first.getLastRow() === 0) ? first.setName(LOG) : ss.insertSheet(LOG);\n    head_(log, LOG_HEAD);\n    log.getRange('A:A').setNumberFormat('dd/mm/yyyy hh:mm');\n  }\n  var sum = ss.getSheetByName(SUM);\n  if (!sum) {\n    sum = ss.insertSheet(SUM, 0);\n    head_(sum, SUM_HEAD);\n    sum.getRange('J:K').setNumberFormat('dd/mm/yyyy hh:mm');\n    sum.hideColumns(SUM_HEAD.indexOf('Key') + 1, 2);\n  }\n}\n\nfunction head_(sh, cols) {\n  sh.getRange(1, 1, 1, cols.length).setValues([cols])\n    .setFontWeight('bold').setBackground('#23864f').setFontColor('#ffffff');\n  sh.setFrozenRows(1);\n}\n";
 function student(){ try { var s = JSON.parse(lsGet('fs:student')); return s && s.name ? s : null; } catch(e){ return null; } }
 function devId(){ var d = lsGet('fs:dev'); if (!d) { d = Math.random().toString(36).slice(2,10) + Date.now().toString(36).slice(-4); lsSet('fs:dev', d); } return d; }
@@ -1447,6 +1460,17 @@ function autoComic(c){
   if (c.example) p.push({who:'kid', mood:'wow', scene:'', say:'I know! ' + c.example, say_vi:c.example_vi ? 'Mình biết rồi! ' + c.example_vi : ''});
   return p;
 }
+function picsOf(x){ return [x && x.img].concat((x && x.imgs) || []).filter(Boolean); }
+function zoomPic(src){
+  var back = h('div', {class:'zoom-back', role:'dialog', 'aria-label':'Picture', onclick:function(){ back.remove(); }},
+    h('img', {src:src, alt:''}), h('button', {class:'btn zoom-x', 'aria-label':'Close'}, '✕'));
+  document.body.append(back);
+}
+function picRow(x, cls){
+  var ps = picsOf(x); if (!ps.length) return null;
+  return h('div', {class:'pic-row n' + Math.min(ps.length, 3) + (cls ? ' ' + cls : '')}, ps.map(function(p, k){
+    return h('button', {class:'pic-tap', type:'button', 'aria-label':'Make picture ' + (k + 1) + ' bigger', onclick:function(e){ e.stopPropagation(); zoomPic(p); }}, h('img', {src:p, alt:''})); }));
+}
 function comicOf(c){ return (c.comic && c.comic.length) ? c.comic : autoComic(c); }
 function sayAs(text, who){ speak(text, (CAST[who] || CAST.seed).pitch); }
 function comicPanel(a, p, n, i){
@@ -1472,7 +1496,7 @@ function gLearn(api){
     var strip = h('div', {class:'comic'});
     var recap = h('div', {class:'cp-recap clay', hidden:true},
       h('div', {class:'cp-recap-head'}, I('bulb'), vi ? 'Ghi nhớ' : 'Remember'),
-      c.img ? h('img', {src:c.img, alt:'', class:'cp-recap-img'}) : null,
+      picRow(c, 'recap-pics'),
       bi(a, c.text, c.text_vi, 'lc-text'),
       c.example ? h('div', {class:'lc-ex'}, h('span', {class:'lc-ex-tag'}, vi ? 'Ví dụ' : 'Example'), bi(a, c.example, c.example_vi, '')) : null,
       h('div', {class:'row', style:'justify-content:center'}, sayBtn(c.text + (c.example ? ' ' + c.example : ''))));
@@ -1549,7 +1573,7 @@ function gCQuiz(api){
     });
     api.el.append(
       h('div', {class:'qcard cq-card'},
-        q.img ? h('img', {class:'cq-img', src:q.img, alt:''}) : null,
+        picRow(q, 'q-pics'),
         bi(a, q.q, q.q_vi, 'qtext'),
         h('div', {class:'row', style:'justify-content:center'}, sayBtn((q.q || '') + ' ' + (q.options || []).map(function(o, k){ return 'ABCDE'.charAt(k) + '. ' + o; }).join('. '), true))),
       hintBox, opts, fb,
@@ -2568,6 +2592,7 @@ function tEditQuiz(w, act){
   w.append(topBar(false));
   function touch(){ act.updated = Date.now(); saveWip(act); }
   act.concepts = act.concepts || []; act.questions = act.questions || []; act.lang = act.lang || 'both';
+  act.concepts.concat(act.questions).forEach(function(x){ x.imgs = (x.imgs || []).filter(Boolean); if (!x.img && x.imgs.length) x.img = x.imgs.shift(); });
   w.append(h('div', {class:'stack', style:'gap:4px;margin-bottom:14px'},
     h('div', {class:'eyebrow'}, (act.status === 'published' ? 'Live concept quiz' : 'Draft concept quiz') + ' · code ' + act.code),
     h('h1', {class:'t3d'}, 'Check the big ideas and questions')));
@@ -2604,7 +2629,7 @@ function tEditQuiz(w, act){
     QSLOTS[sid] = {obj:obj, key:key, label:label, aspect:opt.aspect || 'free', max:opt.max || 640};
     var has = !!obj[key], small = !!opt.small;
     var file = h('input', {type:'file', accept:'image/*', hidden:true, id:'ps-' + sid, onchange:function(){ if (this.files[0]) qSetPic(sid, this.files[0]); }});
-    var tile = h('div', {class:'ps-tile' + (small ? ' sm' : '') + (QACTIVE === sid ? ' active' : '') + (has ? '' : ' empty'), tabindex:'0', role:'button', 'data-sid':sid,
+    var tile = h('div', {class:'ps-tile' + (small && !opt.icons ? ' sm' : '') + (QACTIVE === sid ? ' active' : '') + (has ? '' : ' empty'), tabindex:'0', role:'button', 'data-sid':sid,
         'aria-label':(has ? 'Picture for ' : 'Add a picture for ') + label + '. Click, then press Ctrl+V to paste.', title:'Click here, then press Ctrl+V to paste a picture. You can also drop a picture here.'},
       has ? h('img', {src:obj[key], alt:''}) : h('span', {class:'ps-empty'}, I('picture'), small ? null : h('span', null, 'Click, then paste')));
     function pickMe(){ QACTIVE = sid; document.querySelectorAll('.ps-tile.active').forEach(function(x){ x.classList.remove('active'); }); tile.classList.add('active'); }
@@ -2614,13 +2639,26 @@ function tEditQuiz(w, act){
     tile.addEventListener('dragover', function(e){ e.preventDefault(); tile.classList.add('over'); });
     tile.addEventListener('dragleave', function(){ tile.classList.remove('over'); });
     tile.addEventListener('drop', function(e){ e.preventDefault(); e.stopPropagation(); tile.classList.remove('over'); var f = e.dataTransfer.files && e.dataTransfer.files[0]; if (f && /^image\//.test(f.type)) qSetPic(sid, f); else toast('Drop a picture file here.'); });
+    if (opt.icons) small = true;
     function b(icon, text, fn, extra){ return h('button', {class:'btn ghost sm ps-b' + (extra || ''), type:'button', title:text, 'aria-label':text + ' (' + label + ')', onclick:fn}, I(icon), small ? null : text); }
     var tools = h('div', {class:'ps-tools'},
       h('label', {class:'btn ghost sm ps-b', for:'ps-' + sid, title:'Upload a picture', 'aria-label':'Upload a picture (' + label + ')'}, I('inbox'), small ? null : 'Upload'),
       b('picture', 'Paste', function(){ pickMe(); qPasteBtn(sid); }),
       has ? b('scissors', 'Edit / crop', function(){ qEditPic(sid); }) : null,
-      has ? b('trash', 'Remove', function(){ obj[key] = ''; touch(); render(); }, ' danger') : null);
+      has ? b('trash', 'Remove', function(){ if (Array.isArray(obj) && opt.list) obj.splice(key, 1); else obj[key] = ''; touch(); render(); }, ' danger') : null);
+    if (opt.icons) return h('div', {class:'ps st'}, file, tile, tools);
     return h('div', {class:'ps' + (small ? ' sm' : '')}, file, tile, h('div', {class:'ps-side'}, small ? null : h('span', {class:'ps-label'}, label), tools));
+  }
+  /* several pictures for one question or big idea: first one in .img, the rest in .imgs */
+  function picMany(x, sidBase, label){
+    x.imgs = x.imgs || [];
+    var total = picsOf(x).length, MAX = 6;
+    var row = h('div', {class:'ps-many'},
+      picSlot(x, 'img', sidBase + ':img', label + ' 1', {aspect:'free', icons:true}),
+      x.imgs.map(function(p, k){ return picSlot(x.imgs, k, sidBase + ':m' + k, label + ' ' + (k + 2), {aspect:'free', icons:true, list:true}); }),
+      x.img && total < MAX ? picSlot(x.imgs, x.imgs.length, sidBase + ':m' + x.imgs.length, label + ' ' + (total + 1), {aspect:'free', icons:true, list:true}) : null);
+    return h('div', {class:'field'},
+      h('label', null, label + 's ', h('span', {class:'muted', style:'font-weight:700'}, '(up to ' + MAX + '. Click a box, then paste, or drop a picture on it)')), row);
   }
   async function qSetPic(sid, blob){
     var sl = QSLOTS[sid]; if (!sl) return;
@@ -2671,7 +2709,7 @@ function tEditQuiz(w, act){
       fld(c, 'text', 'Explanation (1–3 simple sentences)', true, 'cx-' + c.id),
       both ? fld(c, 'text_vi', 'Explanation in Vietnamese', true, 'cxv-' + c.id) : null,
       h('div', {class:'qe-grid'}, fld(c, 'example', 'Everyday example', false, 'cex-' + c.id), both ? fld(c, 'example_vi', 'Example in Vietnamese', false, 'cexv-' + c.id) : null),
-      picSlot(c, 'img', c.id + ':img', 'Big idea ' + (i + 1) + ' picture (shown in the Remember box)', {aspect:'free'}),
+      picMany(c, c.id, 'Big idea ' + (i + 1) + ' picture'),
       comicEditor(c)));
   });
   function comicEditor(c){
@@ -2745,7 +2783,7 @@ function tEditQuiz(w, act){
       fld(q, 'explain', 'Explanation students see after answering', true, 'qe-' + q.id),
       both ? fld(q, 'explain_vi', 'Explanation in Vietnamese', true, 'qev-' + q.id) : null,
       act.concepts.length ? h('div', {class:'field'}, h('label', {for:'qc-' + q.id}, 'Big idea it checks (shown as the hint)'), cSel) : null,
-      picSlot(q, 'img', q.id + ':img', 'Question ' + (i + 1) + ' picture', {aspect:'free'})));
+      picMany(q, q.id, 'Question ' + (i + 1) + ' picture')));
   });
 
   // action bar
@@ -3131,4 +3169,3 @@ window.addEventListener('hashchange', function(){ var r = routeFromHash(); if (r
 })();
 })();
 </script>
-</body></html>
