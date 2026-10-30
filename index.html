@@ -1,4 +1,3 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>FLIPSEED</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800&display=swap">
@@ -92,6 +91,14 @@ a{color:var(--sky)}
 @media (max-width:560px){.hero-logo{flex-basis:auto;width:min(230px,70%);margin:0 auto}}
 [hidden]{display:none!important}
 .linkstrip{margin-top:4px}
+.srcs{display:flex;flex-wrap:wrap;gap:10px;flex:1;min-width:0}
+.srcs:empty{display:none}
+.src{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;width:104px;padding:6px;border-radius:16px;background:linear-gradient(180deg,var(--surface),var(--surface-2));box-shadow:inset 0 2px 0 var(--hi),0 4px 0 var(--depth)}
+.src-img{width:90px;height:90px;object-fit:cover;border-radius:12px;background:var(--surface-2)}
+.src-ico{width:90px;height:90px;display:grid;place-items:center;border-radius:12px;background:var(--sky-soft)}
+.src-ico .ico{width:48px;height:48px}
+.src-name{width:100%;font-size:.75rem;font-weight:700;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.src-x{position:absolute;top:-8px;right:-8px;width:30px;height:30px;border-radius:50%;border:0;cursor:pointer;font-weight:800;color:#fff;background:var(--coral);box-shadow:0 3px 0 rgba(0,0,0,.25)}
 .cp-title{max-width:760px;margin:0 auto 14px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center}
 .cp-chap{display:inline-block;padding:4px 14px;border-radius:999px;background:var(--sun);color:var(--on-sun);font-family:var(--f-display);font-weight:800;letter-spacing:.04em;border:3px solid #14301e;box-shadow:3px 3px 0 #14301e;transform:rotate(-2deg)}
 .cp-title-text{font-family:var(--f-display);font-weight:800;font-size:clamp(1.5rem,5vw,2.2rem);line-height:1.1;color:var(--leaf);text-shadow:0 2px 0 var(--sheen),0 3px 0 var(--leaf-depth)}
@@ -917,7 +924,7 @@ function topBar(student){
 
 /* ---------- routing ---------- */
 function go(v){ if (['studio','create','share','edit'].indexOf(v.name)>=0) PREVIEW = null; view = v; if (window.speechSynthesis) try{speechSynthesis.cancel()}catch(e){}; render(); window.scrollTo(0,0); }
-var BUILD = 'Update 28 Oct · comic big ideas';
+var BUILD = 'Update 30 Oct · paste pictures';
 var TRACK_CODE = "/* FLIPSEED student tracking\n   Paste this into your Google Sheet: Extensions \u2192 Apps Script.\n   Then Deploy \u2192 New deployment \u2192 Web app (Execute as: Me, Who has access: Anyone).\n\n   TEACHER KEY: you type this key on your website's Results page (\u2026/flipseed/#results).\n   Keep it private. Only someone with this key can see student results. */\nvar TEACHER_KEY = '__TEACHER_KEY__';\n\nvar LOG = 'Activity log';\nvar SUM = 'Students';\nvar LOG_HEAD = ['Time', 'Student', 'Class', 'Activity', 'Code', 'What happened', 'Game', 'Stars', 'Mistakes', 'Hints used', 'Score', 'Seconds', 'Device'];\nvar SUM_HEAD = ['Student', 'Class', 'Activity', 'Code', 'Games finished', 'Which games', 'Stars', 'Best challenge score', 'Certificate', 'First seen', 'Last active', 'Key', 'Data'];\nvar WHAT = { open: 'Opened the activity', game: 'Finished a game', challenge: 'Super Challenge', cert: 'Got the certificate', test: 'Test' };\n\nfunction doPost(e) {\n  var lock = LockService.getScriptLock();\n  lock.waitLock(25000);\n  try {\n    var body = JSON.parse((e && e.postData && e.postData.contents) || '[]');\n    var list = Array.isArray(body) ? body : [body];\n    var ss = SpreadsheetApp.getActiveSpreadsheet();\n    setup_(ss);\n    list.slice(0, 50).forEach(function (ev) { record_(ss, ev); });\n    return ContentService.createTextOutput('ok');\n  } catch (err) {\n    return ContentService.createTextOutput('error: ' + err);\n  } finally {\n    lock.releaseLock();\n  }\n}\n\nfunction doGet(e) {\n  if (e && e.parameter && e.parameter.action === 'results') return results_(e.parameter);\n  var ss = SpreadsheetApp.getActiveSpreadsheet();\n  var msg = 'FLIPSEED tracking is working.';\n  var lock = LockService.getScriptLock();\n  lock.waitLock(25000);\n  try {\n    setup_(ss);\n    if (e && e.parameter && e.parameter.test) {\n      record_(ss, { type: 'test', name: 'Test student', cls: 'Test', code: 'test', title: 'Test from the teacher', dev: 'teacher' });\n      msg += ' A test row was added to your sheet.';\n    }\n  } finally {\n    lock.releaseLock();\n  }\n  var html = '<div style=\"font-family:Arial,sans-serif;padding:24px;max-width:540px\">' +\n    '<h2 style=\"color:#23864f\">&#10004; ' + msg + '</h2>' +\n    '<p><a href=\"' + ss.getUrl() + '\" target=\"_blank\" style=\"font-size:18px\">Open your FLIPSEED results sheet</a></p></div>';\n  return HtmlService.createHtmlOutput(html).setTitle('FLIPSEED tracking');\n}\n\nfunction results_(p) {\n  var out;\n  if (!TEACHER_KEY || TEACHER_KEY.indexOf('__') === 0 || String(p.key || '') !== TEACHER_KEY) {\n    out = { ok: false, error: 'key' };\n  } else {\n    var ss = SpreadsheetApp.getActiveSpreadsheet();\n    setup_(ss);\n    var sum = ss.getSheetByName(SUM), log = ss.getSheetByName(LOG);\n    var students = [], events = [];\n    if (sum.getLastRow() > 1) {\n      sum.getRange(2, 1, sum.getLastRow() - 1, SUM_HEAD.length).getValues().forEach(function (r) {\n        var d = {}; try { d = JSON.parse(r[12] || '{}'); } catch (x) {}\n        students.push({ name: r[0], cls: r[1], title: r[2], code: r[3], games: d.games || {}, stars: r[6],\n          best: r[7], cert: r[8] === 'Yes', first: iso_(r[9]), last: iso_(r[10]) });\n      });\n    }\n    var n = log.getLastRow() - 1;\n    if (n > 0) {\n      var take = Math.min(n, 2000);\n      log.getRange(log.getLastRow() - take + 1, 1, take, LOG_HEAD.length).getValues().forEach(function (r) {\n        events.push({ time: iso_(r[0]), name: r[1], cls: r[2], title: r[3], code: r[4], what: r[5], game: r[6],\n          stars: r[7], mistakes: r[8], hints: r[9], score: r[10], secs: r[11] });\n      });\n    }\n    out = { ok: true, sheet: ss.getUrl(), now: new Date().toISOString(), students: students, events: events };\n  }\n  var json = JSON.stringify(out);\n  if (p.callback && /^[A-Za-z_$][\\w$]{0,40}$/.test(p.callback)) {\n    return ContentService.createTextOutput(p.callback + '(' + json + ')').setMimeType(ContentService.MimeType.JAVASCRIPT);\n  }\n  return ContentService.createTextOutput(json).setMimeType(ContentService.MimeType.JSON);\n}\n\nfunction iso_(v) {\n  return v instanceof Date ? v.toISOString() : (v ? String(v) : '');\n}\n\nfunction clean_(v, n) {\n  v = String(v == null ? '' : v).replace(/[\\u0000-\\u001f]/g, ' ').replace(/\\s+/g, ' ').trim().slice(0, n || 80);\n  return /^[=+\\-@]/.test(v) ? \"'\" + v : v;\n}\n\nfunction num_(v) {\n  v = Number(v);\n  return isFinite(v) ? v : '';\n}\n\nfunction record_(ss, ev) {\n  if (!ev || !ev.name || !ev.code) return;\n  var now = new Date();\n  var name = clean_(ev.name, 40), cls = clean_(ev.cls, 20), code = clean_(ev.code, 10);\n  var title = clean_(ev.title, 80), dev = clean_(ev.dev, 40), game = clean_(ev.game, 40);\n  var type = WHAT[ev.type] ? ev.type : 'game';\n\n  ss.getSheetByName(LOG).appendRow([now, name, cls, title, code, WHAT[type], game,\n    num_(ev.stars), num_(ev.mistakes), num_(ev.hints), num_(ev.score), num_(ev.secs), dev]);\n  if (type === 'test') return;\n\n  var sh = ss.getSheetByName(SUM);\n  var key = (name.toLowerCase() + '|' + cls.toLowerCase() + '|' + code.toLowerCase()).slice(0, 120);\n  var keyCol = SUM_HEAD.indexOf('Key') + 1;\n  var rows = Math.max(1, sh.getLastRow() - 1);\n  var found = sh.getRange(2, keyCol, rows, 1).createTextFinder(key).matchEntireCell(true).findNext();\n  var row, data;\n  if (found) {\n    row = found.getRow();\n    try { data = JSON.parse(sh.getRange(row, keyCol + 1).getValue() || '{}'); } catch (x) { data = {}; }\n  } else {\n    row = sh.getLastRow() + 1;\n    data = {};\n  }\n  data.games = data.games || {};\n  data.first = data.first || now.toISOString();\n  if (type === 'game' && game) data.games[game] = Math.max(data.games[game] || 0, Number(ev.stars) || 0);\n  if (type === 'challenge') data.best = Math.max(data.best || 0, Number(ev.score) || 0);\n  if (type === 'cert') data.cert = true;\n\n  var names = Object.keys(data.games);\n  var stars = names.reduce(function (s, k) { return s + (data.games[k] || 0); }, 0);\n  sh.getRange(row, 1, 1, SUM_HEAD.length).setValues([[\n    name, cls, title, code, names.length, names.join(', '), stars,\n    data.best || '', data.cert ? 'Yes' : '', new Date(data.first), now, key, JSON.stringify(data)\n  ]]);\n}\n\nfunction setup_(ss) {\n  var log = ss.getSheetByName(LOG);\n  if (!log) {\n    var first = ss.getSheets()[0];\n    log = (ss.getSheets().length === 1 && first.getLastRow() === 0) ? first.setName(LOG) : ss.insertSheet(LOG);\n    head_(log, LOG_HEAD);\n    log.getRange('A:A').setNumberFormat('dd/mm/yyyy hh:mm');\n  }\n  var sum = ss.getSheetByName(SUM);\n  if (!sum) {\n    sum = ss.insertSheet(SUM, 0);\n    head_(sum, SUM_HEAD);\n    sum.getRange('J:K').setNumberFormat('dd/mm/yyyy hh:mm');\n    sum.hideColumns(SUM_HEAD.indexOf('Key') + 1, 2);\n  }\n}\n\nfunction head_(sh, cols) {\n  sh.getRange(1, 1, 1, cols.length).setValues([cols])\n    .setFontWeight('bold').setBackground('#23864f').setFontColor('#ffffff');\n  sh.setFrozenRows(1);\n}\n";
 function student(){ try { var s = JSON.parse(lsGet('fs:student')); return s && s.name ? s : null; } catch(e){ return null; } }
 function devId(){ var d = lsGet('fs:dev'); if (!d) { d = Math.random().toString(36).slice(2,10) + Date.now().toString(36).slice(-4); lsSet('fs:dev', d); } return d; }
@@ -2199,18 +2206,80 @@ function tCreate(w){
     h('p',{class:'muted'}, QZ ? 'Upload photos or a PDF of the book pages. FLIPSEED teaches the big ideas first, then quizzes students and explains every answer. You can change everything afterwards.' : 'FLIPSEED reads your lesson and picks the key Science words. You can change everything afterwards.')));
   w.append(kindChooser(kind));
   var fileIn = h('input',{type:'file', id:'c-file', multiple:true, accept:'.pdf,.pptx,.docx,.txt,.md,.png,.jpg,.jpeg,.webp,.heic,image/*', hidden:true});
-  var fileName = h('span',{class:'small muted'}, QZ ? 'Photos of the book pages (you can choose several), PDF, PowerPoint or Word' : 'PDF, PowerPoint (.pptx), Word (.docx), text or a photo of the page');
-  var files = [];
+  var fileName = h('span',{class:'small muted'}, 'Pictures or screenshots of the book pages, PDF, PowerPoint (.pptx), Word (.docx) or text');
+  var files = [], pasteN = 0;
   var drop = h('label',{class:'drop', for:'c-file'},
     I('inbox'),
-    h('strong',null, QZ ? 'Drop the book pages here' : 'Drop your lesson file here'),
-    h('span',null,'or click to choose files'), fileName);
-  function pick(list){ list = Array.prototype.slice.call(list||[]); if (!list.length) return; files = list.slice(0, 20); fileName.textContent = 'Selected: '+files.map(function(f){ return f.name; }).join(', ')+' ('+Math.round(files.reduce(function(s,f){ return s+f.size; },0)/1024)+' KB)'; drop.classList.add('over'); }
-  fileIn.addEventListener('change', function(){ pick(fileIn.files); });
+    h('strong',null, QZ ? 'Drop or paste the book pages here' : 'Drop or paste your lesson here'),
+    h('span',null,'Drag files or pictures in, press Ctrl+V (⌘+V on Mac) to paste a picture, or click to choose files'), fileName);
+  var srcList = h('div',{class:'srcs', 'aria-live':'polite'});
+  var pasteBtn = h('button',{class:'btn sm sky', type:'button', onclick:async function(){
+    try {
+      if (!navigator.clipboard || !navigator.clipboard.read) throw new Error('no');
+      var items = await navigator.clipboard.read(), got = [];
+      for (var i = 0; i < items.length; i++) {
+        var tp = items[i].types.find(function(x){ return /^image\//.test(x); });
+        if (tp) got.push(await items[i].getType(tp));
+      }
+      if (!got.length) return toast('There is no picture copied yet. Copy a picture or take a screenshot first.', 4500);
+      add(got);
+    } catch(e){ toast('Press Ctrl+V (or ⌘+V on a Mac) anywhere on this page to paste your picture.', 4500); }
+  }}, I('picture'), 'Paste a picture');
+  function niceFile(f){
+    if (f && f.name && !/^image\.(png|jpe?g|gif|webp)$/i.test(f.name)) return f;
+    pasteN++;
+    var ext = ((f.type || 'image/png').split('/')[1] || 'png').replace('jpeg','jpg');
+    try { return new File([f], 'Pasted picture ' + pasteN + '.' + ext, {type: f.type || 'image/png'}); } catch(e){ f.pastedName = 'Pasted picture ' + pasteN; return f; }
+  }
+  function add(list){
+    list = Array.prototype.slice.call(list || []).filter(Boolean).map(niceFile);
+    if (!list.length) return;
+    var room = 20 - files.length;
+    if (room <= 0) return toast('That is 20 files already. Remove one to add another.');
+    if (list.length > room) toast('Only 20 files can be added. The extra ones were left out.');
+    files = files.concat(list.slice(0, room));
+    showFiles(); playEv('ok');
+  }
+  function showFiles(){
+    srcList.textContent = '';
+    drop.classList.toggle('over', files.length > 0);
+    fileName.textContent = files.length ? files.length + (files.length === 1 ? ' file' : ' files') + ' added. You can add more.' : 'Pictures or screenshots of the book pages, PDF, PowerPoint (.pptx), Word (.docx) or text';
+    files.forEach(function(f, i){
+      var nm = f.pastedName || f.name || 'Picture';
+      var isImg = /^image\//.test(f.type) || /\.(png|jpe?g|webp|gif)$/i.test(nm);
+      var thumb;
+      if (isImg) { thumb = h('img',{alt:'', class:'src-img'}); try { var u = URL.createObjectURL(f); thumb.src = u; thumb.onload = function(){ URL.revokeObjectURL(u); }; } catch(e){} }
+      else thumb = h('div',{class:'src-ico'}, I(/\.pdf$/i.test(nm) ? 'page' : /\.pptx$/i.test(nm) ? 'picture' : 'memo'));
+      srcList.append(h('div',{class:'src'}, thumb,
+        h('span',{class:'src-name', title:nm}, nm),
+        h('button',{class:'src-x', type:'button', 'aria-label':'Remove '+nm, onclick:function(){ files.splice(i, 1); showFiles(); }}, '✕')));
+    });
+  }
+  fileIn.addEventListener('change', function(){ add(fileIn.files); fileIn.value = ''; });
   ['dragenter','dragover'].forEach(function(ev){ drop.addEventListener(ev, function(e){ e.preventDefault(); drop.classList.add('over'); }); });
   drop.addEventListener('dragleave', function(){ if (!files.length) drop.classList.remove('over'); });
-  drop.addEventListener('drop', function(e){ e.preventDefault(); pick(e.dataTransfer.files); });
+  async function fromDrop(dt){
+    if (dt.files && dt.files.length) return add(dt.files);
+    var url = (dt.getData('text/uri-list') || dt.getData('text/plain') || '').split('\n')[0].trim();
+    if (!url) return;
+    try {
+      var r = await fetch(url); var b = await r.blob();
+      if (!/^image\//.test(b.type)) throw new Error('no');
+      add([b]);
+    } catch(e){ toast('That picture could not be taken from the website. Right-click it, choose "Copy image", then press Ctrl+V here.', 6000); }
+  }
+  drop.addEventListener('drop', function(e){ e.preventDefault(); fromDrop(e.dataTransfer); });
+  function onPaste(e){
+    if (!drop.isConnected) { document.removeEventListener('paste', onPaste); return; }
+    var cd = e.clipboardData; if (!cd) return;
+    var imgs = Array.prototype.slice.call(cd.items || []).filter(function(it){ return it.kind === 'file'; }).map(function(it){ return it.getAsFile(); }).filter(Boolean);
+    if (imgs.length) { e.preventDefault(); add(imgs); return; }
+    var t = cd.getData('text/plain');
+    if (t && e.target !== txt && !/^(INPUT|TEXTAREA|SELECT)$/.test((e.target || {}).tagName || '')) { e.preventDefault(); txt.value = (txt.value ? txt.value + '\n' : '') + t; toast('Text pasted into the lesson box.'); }
+  }
+  document.addEventListener('paste', onPaste);
   var txt = h('textarea',{class:'inp', id:'c-text', placeholder:'…or paste the lesson text here'});
+  txt.addEventListener('drop', function(e){ if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) { e.preventDefault(); add(e.dataTransfer.files); } });
   var grade = h('select',{class:'inp', id:'c-grade'}, ['1','2','3','4','5','6','7','8'].map(function(g){return h('option',{value:g, selected:g==='3'}, 'Grade '+g)}));
   var topic = h('input',{class:'inp', id:'c-topic', placeholder:'e.g. Materials and their properties'});
   var count = QZ ? h('select',{class:'inp', id:'c-count'}, ['5','8','10','12','15'].map(function(n){return h('option',{value:n, selected:n==='10'}, n+' questions')}))
@@ -2221,7 +2290,7 @@ function tCreate(w){
     var b = h('button',{class:o[0]===qlang?'on':'', onclick:function(){ qlang = o[0]; langSeg.querySelectorAll('button').forEach(function(x){ x.classList.remove('on'); }); b.classList.add('on'); }}, o[1]); return b; }));
   var status = h('div',{'aria-live':'polite'});
   var goBtn = h('button',{class:'btn primary', onclick:run}, I('sparkles'), QZ ? 'Make the quiz' : 'Find the key words');
-  w.append(h('div',{class:'stack', style:'margin-top:16px'}, fileIn, drop, txt,
+  w.append(h('div',{class:'stack', style:'margin-top:16px'}, fileIn, drop, h('div',{class:'row', style:'justify-content:space-between'}, srcList, pasteBtn), txt,
     h('div',{class:'grid2'},
       h('div',{class:'field'}, h('label',{for:'c-grade'},'Grade'), grade),
       h('div',{class:'field'}, h('label',{for:'c-topic'},'Lesson topic (optional)'), topic),
@@ -2239,7 +2308,7 @@ function tCreate(w){
       var content = {text: txt.value.trim(), images: []}, texts = [];
       gallery = [];
       for (var fi = 0; fi < files.length; fi++) {
-        setStatus('Reading '+files[fi].name+(files.length > 1 ? ' ('+(fi+1)+' of '+files.length+')' : '')+'…', 'busy');
+        setStatus('Reading '+(files[fi].pastedName || files[fi].name || 'picture')+(files.length > 1 ? ' ('+(fi+1)+' of '+files.length+')' : '')+'…', 'busy');
         var r = await readLessonFile(files[fi]);
         if (r.text) texts.push(r.text);
         content.images = content.images.concat(r.images || []); gallery = gallery.concat(r.gallery || []);
@@ -2299,7 +2368,7 @@ function friendlyErr(e){
 
 /* ---- file reading ---- */
 async function readLessonFile(file){
-  var name = file.name.toLowerCase(), out = {text:'', images:[], gallery:[]};
+  var name = (file.name || 'picture.png').toLowerCase(), out = {text:'', images:[], gallery:[]};
   if (/\.(ppt|doc|key|pages)$/.test(name)) throw new Error('Please save this file as .pptx, .docx or PDF first (File → Save As), then upload it again.');
   if (/\.(txt|md)$/.test(name)) { out.text = await file.text(); return out; }
   if (/\.(png|jpe?g|webp)$/.test(name) || /^image\//.test(file.type)) {
@@ -3000,4 +3069,3 @@ window.addEventListener('hashchange', function(){ var r = routeFromHash(); if (r
 })();
 })();
 </script>
-</body></html>
