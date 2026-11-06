@@ -1032,7 +1032,7 @@ function topBar(student){
 
 /* ---------- routing ---------- */
 function go(v){ if (['studio','create','share','edit'].indexOf(v.name)>=0) PREVIEW = null; view = v; if (window.speechSynthesis) try{speechSynthesis.cancel()}catch(e){}; render(); window.scrollTo(0,0); }
-var BUILD = 'Update 6 Nov · mission journey';
+var BUILD = 'Update 6 Nov · leaderboard page';
 var TRACK_CODE = "/* FLIPSEED student tracking\n   Paste this into your Google Sheet: Extensions \u2192 Apps Script.\n   Then Deploy \u2192 New deployment \u2192 Web app (Execute as: Me, Who has access: Anyone).\n\n   TEACHER KEY: you type this key on your website's Results page (\u2026/flipseed/#results).\n   Keep it private. Only someone with this key can see or delete student results.\n   The leaderboard (?action=board) is public on purpose: it shows only names, classes, stars and missions. */\nvar TEACHER_KEY = '__TEACHER_KEY__';\n\nvar LOG = 'Activity log';\nvar SUM = 'Students';\nvar LOG_HEAD = ['Time', 'Student', 'Class', 'Activity', 'Code', 'What happened', 'Game', 'Stars', 'Mistakes', 'Hints used', 'Score', 'Seconds', 'Device'];\nvar SUM_HEAD = ['Student', 'Class', 'Activity', 'Code', 'Games finished', 'Which games', 'Stars', 'Best challenge score', 'Certificate', 'First seen', 'Last active', 'Key', 'Data'];\nvar WHAT = { open: 'Opened the activity', game: 'Finished a game', challenge: 'Super Challenge', cert: 'Got the certificate', test: 'Test' };\n\nfunction doPost(e) {\n  var lock = LockService.getScriptLock();\n  lock.waitLock(25000);\n  try {\n    var body = JSON.parse((e && e.postData && e.postData.contents) || '[]');\n    var list = Array.isArray(body) ? body : [body];\n    var ss = SpreadsheetApp.getActiveSpreadsheet();\n    setup_(ss);\n    list.slice(0, 50).forEach(function (ev) { record_(ss, ev); });\n    return ContentService.createTextOutput('ok');\n  } catch (err) {\n    return ContentService.createTextOutput('error: ' + err);\n  } finally {\n    lock.releaseLock();\n  }\n}\n\nfunction doGet(e) {\n  if (e && e.parameter && e.parameter.action === 'results') return results_(e.parameter);\n  if (e && e.parameter && e.parameter.action === 'board') return board_(e.parameter);\n  if (e && e.parameter && e.parameter.action === 'delete') return delete_(e.parameter);\n  var ss = SpreadsheetApp.getActiveSpreadsheet();\n  var msg = 'FLIPSEED tracking is working.';\n  var lock = LockService.getScriptLock();\n  lock.waitLock(25000);\n  try {\n    setup_(ss);\n    if (e && e.parameter && e.parameter.test) {\n      record_(ss, { type: 'test', name: 'Test student', cls: 'Test', code: 'test', title: 'Test from the teacher', dev: 'teacher' });\n      msg += ' A test row was added to your sheet.';\n    }\n  } finally {\n    lock.releaseLock();\n  }\n  var html = '<div style=\"font-family:Arial,sans-serif;padding:24px;max-width:540px\">' +\n    '<h2 style=\"color:#23864f\">&#10004; ' + msg + '<\/h2>' +\n    '<p><a href=\"' + ss.getUrl() + '\" target=\"_blank\" style=\"font-size:18px\">Open your FLIPSEED results sheet<\/a><\/p><\/div>';\n  return HtmlService.createHtmlOutput(html).setTitle('FLIPSEED tracking');\n}\n\nfunction results_(p) {\n  var out;\n  if (!TEACHER_KEY || TEACHER_KEY.indexOf('__') === 0 || String(p.key || '') !== TEACHER_KEY) {\n    out = { ok: false, error: 'key' };\n  } else {\n    var ss = SpreadsheetApp.getActiveSpreadsheet();\n    setup_(ss);\n    var sum = ss.getSheetByName(SUM), log = ss.getSheetByName(LOG);\n    var students = [], events = [];\n    if (sum.getLastRow() > 1) {\n      sum.getRange(2, 1, sum.getLastRow() - 1, SUM_HEAD.length).getValues().forEach(function (r) {\n        var d = {}; try { d = JSON.parse(r[12] || '{}'); } catch (x) {}\n        students.push({ name: r[0], cls: r[1], title: r[2], code: r[3], games: d.games || {}, stars: r[6],\n          best: r[7], cert: r[8] === 'Yes', first: iso_(r[9]), last: iso_(r[10]) });\n      });\n    }\n    var n = log.getLastRow() - 1;\n    if (n > 0) {\n      var take = Math.min(n, 2000);\n      log.getRange(log.getLastRow() - take + 1, 1, take, LOG_HEAD.length).getValues().forEach(function (r) {\n        events.push({ time: iso_(r[0]), name: r[1], cls: r[2], title: r[3], code: r[4], what: r[5], game: r[6],\n          stars: r[7], mistakes: r[8], hints: r[9], score: r[10], secs: r[11] });\n      });\n    }\n    out = { ok: true, sheet: ss.getUrl(), now: new Date().toISOString(), students: students, events: events };\n  }\n  var json = JSON.stringify(out);\n  if (p.callback && /^[A-Za-z_$][\\w$]{0,40}$/.test(p.callback)) {\n    return ContentService.createTextOutput(p.callback + '(' + json + ')').setMimeType(ContentService.MimeType.JAVASCRIPT);\n  }\n  return ContentService.createTextOutput(json).setMimeType(ContentService.MimeType.JSON);\n}\n\nfunction send_(p, out) {\n  var json = JSON.stringify(out);\n  if (p.callback && /^[A-Za-z_$][\\w$]{0,40}$/.test(p.callback)) {\n    return ContentService.createTextOutput(p.callback + '(' + json + ')').setMimeType(ContentService.MimeType.JAVASCRIPT);\n  }\n  return ContentService.createTextOutput(json).setMimeType(ContentService.MimeType.JSON);\n}\n\n/* Leaderboard for students: only names, classes, stars and finished missions. No teacher key needed. */\nfunction board_(p) {\n  var cache = CacheService.getScriptCache();\n  var hit = cache.get('board');\n  if (hit) return send_(p, JSON.parse(hit));\n  var ss = SpreadsheetApp.getActiveSpreadsheet();\n  setup_(ss);\n  var sum = ss.getSheetByName(SUM), by = {};\n  if (sum.getLastRow() > 1) {\n    sum.getRange(2, 1, sum.getLastRow() - 1, SUM_HEAD.length).getValues().forEach(function (r) {\n      if (!r[0]) return;\n      var k = (String(r[0]) + '|' + String(r[1])).toLowerCase();\n      var o = by[k] || (by[k] = { n: String(r[0]), c: String(r[1]), s: 0, m: 0, codes: {} });\n      o.s += Number(r[6]) || 0;\n      if (r[8] === 'Yes') o.m += 1;\n      o.codes[String(r[3])] = Number(r[4]) || 0;\n    });\n  }\n  var out = { ok: true, now: new Date().toISOString(), rows: Object.keys(by).map(function (k) { return by[k]; }) };\n  try { cache.put('board', JSON.stringify(out), 30); } catch (x) {}\n  return send_(p, out);\n}\n\n/* Teacher only: delete a student's results (one activity, or all of them). */\nfunction delete_(p) {\n  if (!TEACHER_KEY || TEACHER_KEY.indexOf('__') === 0 || String(p.key || '') !== TEACHER_KEY) return send_(p, { ok: false, error: 'key' });\n  var name = String(p.name || '').trim().toLowerCase(), cls = String(p.cls || '').trim().toLowerCase(), code = String(p.code || '').trim().toLowerCase();\n  if (!name) return send_(p, { ok: false, error: 'name' });\n  var lock = LockService.getScriptLock();\n  lock.waitLock(25000);\n  var removed = { students: 0, log: 0 };\n  try {\n    var ss = SpreadsheetApp.getActiveSpreadsheet();\n    setup_(ss);\n    [[SUM, 0, 1, 3, 'students'], [LOG, 1, 2, 4, 'log']].forEach(function (t) {\n      var sh = ss.getSheetByName(t[0]), n = sh.getLastRow() - 1;\n      if (n < 1) return;\n      var vals = sh.getRange(2, 1, n, Math.max(t[1], t[2], t[3]) + 1).getValues();\n      for (var i = vals.length - 1; i >= 0; i--) {\n        var r = vals[i];\n        var nm = String(r[t[1]]).trim().toLowerCase(), cl = String(r[t[2]]).trim().toLowerCase(), cd = String(r[t[3]]).trim().toLowerCase();\n        if (nm === name && cl === cls && (!code || cd === code)) { sh.deleteRow(i + 2); removed[t[4]]++; }\n      }\n    });\n    CacheService.getScriptCache().remove('board');\n  } finally {\n    lock.releaseLock();\n  }\n  return send_(p, { ok: true, removed: removed });\n}\n\nfunction iso_(v) {\n  return v instanceof Date ? v.toISOString() : (v ? String(v) : '');\n}\n\nfunction clean_(v, n) {\n  v = String(v == null ? '' : v).replace(/[\\u0000-\\u001f]/g, ' ').replace(/\\s+/g, ' ').trim().slice(0, n || 80);\n  return /^[=+\\-@]/.test(v) ? \"'\" + v : v;\n}\n\nfunction num_(v) {\n  v = Number(v);\n  return isFinite(v) ? v : '';\n}\n\nfunction record_(ss, ev) {\n  if (!ev || !ev.name || !ev.code) return;\n  var now = new Date();\n  var name = clean_(ev.name, 40), cls = clean_(ev.cls, 20), code = clean_(ev.code, 10);\n  var title = clean_(ev.title, 80), dev = clean_(ev.dev, 40), game = clean_(ev.game, 40);\n  var type = WHAT[ev.type] ? ev.type : 'game';\n\n  try { CacheService.getScriptCache().remove('board'); } catch (x) {}\n  ss.getSheetByName(LOG).appendRow([now, name, cls, title, code, WHAT[type], game,\n    num_(ev.stars), num_(ev.mistakes), num_(ev.hints), num_(ev.score), num_(ev.secs), dev]);\n  if (type === 'test') return;\n\n  var sh = ss.getSheetByName(SUM);\n  var key = (name.toLowerCase() + '|' + cls.toLowerCase() + '|' + code.toLowerCase()).slice(0, 120);\n  var keyCol = SUM_HEAD.indexOf('Key') + 1;\n  var rows = Math.max(1, sh.getLastRow() - 1);\n  var found = sh.getRange(2, keyCol, rows, 1).createTextFinder(key).matchEntireCell(true).findNext();\n  var row, data;\n  if (found) {\n    row = found.getRow();\n    try { data = JSON.parse(sh.getRange(row, keyCol + 1).getValue() || '{}'); } catch (x) { data = {}; }\n  } else {\n    row = sh.getLastRow() + 1;\n    data = {};\n  }\n  data.games = data.games || {};\n  data.first = data.first || now.toISOString();\n  if (type === 'game' && game) data.games[game] = Math.max(data.games[game] || 0, Number(ev.stars) || 0);\n  if (type === 'challenge') data.best = Math.max(data.best || 0, Number(ev.score) || 0);\n  if (type === 'cert') data.cert = true;\n\n  var names = Object.keys(data.games);\n  var stars = names.reduce(function (s, k) { return s + (data.games[k] || 0); }, 0);\n  sh.getRange(row, 1, 1, SUM_HEAD.length).setValues([[\n    name, cls, title, code, names.length, names.join(', '), stars,\n    data.best || '', data.cert ? 'Yes' : '', new Date(data.first), now, key, JSON.stringify(data)\n  ]]);\n}\n\nfunction setup_(ss) {\n  var log = ss.getSheetByName(LOG);\n  if (!log) {\n    var first = ss.getSheets()[0];\n    log = (ss.getSheets().length === 1 && first.getLastRow() === 0) ? first.setName(LOG) : ss.insertSheet(LOG);\n    head_(log, LOG_HEAD);\n    log.getRange('A:A').setNumberFormat('dd/mm/yyyy hh:mm');\n  }\n  var sum = ss.getSheetByName(SUM);\n  if (!sum) {\n    sum = ss.insertSheet(SUM, 0);\n    head_(sum, SUM_HEAD);\n    sum.getRange('J:K').setNumberFormat('dd/mm/yyyy hh:mm');\n    sum.hideColumns(SUM_HEAD.indexOf('Key') + 1, 2);\n  }\n}\n\nfunction head_(sh, cols) {\n  sh.getRange(1, 1, 1, cols.length).setValues([cols])\n    .setFontWeight('bold').setBackground('#23864f').setFontColor('#ffffff');\n  sh.setFrozenRows(1);\n}\n";
 function student(){ try { var s = JSON.parse(lsGet('fs:student')); return s && s.name ? s : null; } catch(e){ return null; } }
 function devId(){ var d = lsGet('fs:dev'); if (!d) { d = Math.random().toString(36).slice(2,10) + Date.now().toString(36).slice(-4); lsSet('fs:dev', d); } return d; }
@@ -1130,13 +1130,13 @@ function delResults(r, allActs){
   var url = u + '?action=delete&key=' + encodeURIComponent(k) + '&name=' + encodeURIComponent(r.name) + '&cls=' + encodeURIComponent(r.cls || '') + (allActs ? '' : '&code=' + encodeURIComponent(r.code)) + '&t=' + Date.now();
   return fetch(url).then(function(x){ return x.text(); }).then(function(t){ try { return JSON.parse(t); } catch(e){ return /^\s*</.test(t) ? {ok:false, error:'old'} : jsonp(url); } }, function(){ return jsonp(url); });
 }
-function askDelete(r){
+function askDelete(r, allOnly){
   var msg = h('p',{class:'small', 'aria-live':'polite', style:'min-height:1.3em;font-weight:800'});
   function run(all){
     back.querySelectorAll('button').forEach(function(b){ b.disabled = true; });
     msg.textContent = 'Deleting…';
     delResults(r, all).then(function(d){
-      if (d && d.ok) { back.remove(); toast('Deleted ' + ((d.removed && d.removed.students) || 0) + ' result' + (((d.removed && d.removed.students) || 0) === 1 ? '' : 's') + ' for ' + r.name + '.', 4000); RES.data = null; loadRes(); return; }
+      if (d && d.ok) { back.remove(); toast('Deleted ' + ((d.removed && d.removed.students) || 0) + ' result' + (((d.removed && d.removed.students) || 0) === 1 ? '' : 's') + ' for ' + r.name + '.', 4000); RES.data = null; JN.board = null; if (view.name === 'board') { loadBoard(); render(); } else loadRes(); return; }
       back.querySelectorAll('button').forEach(function(b){ b.disabled = false; });
       msg.textContent = d && d.error === 'old' ? 'Your Google script needs the new code first. In the FLIPSEED Teacher Studio, open "Mission journey" and follow "Update your Google script".'
         : d && d.error === 'key' ? 'Your teacher key was not accepted. Sign out and type it again.' : 'Could not reach your Google Sheet. Try again.';
@@ -1147,7 +1147,7 @@ function askDelete(r){
       h('h2',null, I('trash'), 'Delete results?'),
       h('p',null, 'Delete the results of ', h('b',null, r.name), r.cls ? ' (' + r.cls + ')' : '', '? They will also leave the leaderboard. This cannot be undone.'),
       h('div',{class:'stack', style:'gap:8px'},
-        h('button',{class:'btn danger', onclick:function(){ run(false); }}, I('trash'), 'Only "' + r.title + '"'),
+        allOnly ? null : h('button',{class:'btn danger', onclick:function(){ run(false); }}, I('trash'), 'Only "' + r.title + '"'),
         h('button',{class:'btn danger', onclick:function(){ run(true); }}, I('trash'), 'Every activity for ' + r.name),
         h('button',{class:'btn ghost', onclick:function(){ back.remove(); }}, 'Cancel')),
       msg));
@@ -1182,6 +1182,7 @@ function sResults(w){
   var bar = h('div',{class:'row', style:'margin-bottom:14px'},
     h('button',{class:'btn sm primary', disabled:RES.loading, onclick:function(){ loadRes(); }}, I('rotr'), RES.loading ? 'Loading…' : 'Refresh'),
     d && d.sheet ? h('a',{class:'btn sm', href:d.sheet, target:'_blank', rel:'noopener'}, I('books'), 'Open Google Sheet') : null,
+    h('a',{class:'btn sm sun', href:'#leaderboard'}, I('trophy'), 'Leaderboard'),
     h('button',{class:'btn sm ghost', onclick:function(){ lsDel('fs:siteKey'); RES.data = null; RES.err = ''; render(); }}, 'Sign out'),
     d ? h('span',{class:'small muted'}, 'Updated ' + fmtTime(d.now) + ' · refreshes every minute') : null);
   w.append(bar);
@@ -1301,7 +1302,7 @@ function render(){
   setTimeout(function(){ w.append(h('p',{class:'buildtag'}, BUILD)); }, 0);
   if (view.name !== 'journey') musicStop();
   var V = {
-    home:sHome, hub:sHub, game:sGame, cert:sCert, who:sNameGate, results:sResults, journey:sJourney,
+    home:sHome, hub:sHub, game:sGame, cert:sCert, who:sNameGate, results:sResults, journey:sJourney, board:sBoard,
     studio:tStudio, create:tCreate, edit:tEdit, share:tShare
   }[view.name] || sHome;
   if (!IS_TEACHER && ['studio','create','edit','share'].indexOf(view.name) >= 0) { view={name:'home'}; V=sHome; }
@@ -1626,7 +1627,30 @@ function missionDone(m){
 function markDone(code){ if (sid()) lsSet(doneKey(code), '1'); }
 
 /* ---- leaderboard (from the teacher's Google Sheet) ---- */
-function boardPoints(r){ return (+r.s || 0) * 10 + (+r.m || 0) * 50; }
+function rowMissions(r){
+  var nOf = {}; (JN.list || (DATA.settings && DATA.settings.jmeta) || []).forEach(function(m){ nOf[m.code] = m.n; });
+  var full = Object.keys(r.codes || {}).filter(function(c){ return nOf[c] && +r.codes[c] >= nOf[c]; }).length;
+  return Math.max(+r.m || 0, full);
+}
+function boardPoints(r){ return (+r.s || 0) * 10 + rowMissions(r) * 50; }
+function lbRanked(cls){
+  var rows = ((JN.board && JN.board.rows) || []).filter(function(r){ return !cls || String(r.c).toLowerCase() === String(cls).toLowerCase(); })
+    .map(function(r){ return Object.assign({}, r, {mis:rowMissions(r), pts:boardPoints(r)}); }).filter(function(r){ return r.pts > 0; })
+    .sort(function(a, b){ return b.pts - a.pts || b.mis - a.mis || String(a.n).localeCompare(String(b.n)); });
+  var rank = 0, last = null;
+  rows.forEach(function(r, i){ if (r.pts !== last) { rank = i + 1; last = r.pts; } r.rank = rank; });
+  return rows;
+}
+function lbRow(r, opt){
+  opt = opt || {}; var vi = LANG === 'vi';
+  return h('li',{class:'lb-row' + (opt.me ? ' me' : '') + (r.rank <= 3 ? ' top' + r.rank : '')},
+    h('span',{class:'lb-rank'}, r.rank === 1 ? '🥇' : r.rank === 2 ? '🥈' : r.rank === 3 ? '🥉' : String(r.rank)),
+    h('img',{class:'lb-seedy', src:seedySvg(Math.min(EVO_MAX, r.mis)), alt:''}),
+    h('span',{class:'lb-name'}, h('b',null, r.n), opt.me ? h('span',{class:'chip live', style:'margin-left:6px'}, vi ? 'Em' : 'You') : null,
+      h('span',{class:'small muted lb-cls'}, (r.c ? r.c + ' · ' : '') + r.mis + (vi ? ' nhiệm vụ' : (r.mis === 1 ? ' mission' : ' missions')) + ' · ★ ' + (+r.s || 0))),
+    h('span',{class:'lb-pts'}, I('glow'), String(r.pts)),
+    opt.del ? h('button',{class:'btn ghost sm', title:'Delete results', 'aria-label':'Delete all results of ' + r.n, onclick:function(){ askDelete({name:r.n, cls:r.c, code:'', title:''}, true); }}, I('trash')) : null);
+}
 function myBoardRow(){
   var b = JN.board, me = sid(); if (!b || !b.rows || !me) return null;
   return b.rows.find(function(r){ return (String(r.n) + '|' + String(r.c || '')).toLowerCase() === me; }) || null;
@@ -1641,6 +1665,7 @@ function loadBoard(quiet){
       if (d && d.ok === true) { JN.board = d; JN.boardErr = ''; }
       else JN.boardErr = (d && d.error) || 'net';
       if (view.name === 'journey') paintBoard();
+      if (view.name === 'board') render();
     });
 }
 var boardBox = null;
@@ -1661,22 +1686,11 @@ function paintBoard(){
     else boardBox.append(h('div',{class:'progress'}, h('div',{class:'spin'}), vi ? 'Đang tải…' : 'Loading…'));
     return;
   }
-  var rows = (JN.board.rows || []).filter(function(r){ return JN.tab === 'all' || !st.cls || String(r.c).toLowerCase() === String(st.cls).toLowerCase(); })
-    .map(function(r){ return Object.assign({}, r, {pts:boardPoints(r)}); }).filter(function(r){ return r.pts > 0; })
-    .sort(function(a, b){ return b.pts - a.pts || (+b.m || 0) - (+a.m || 0) || String(a.n).localeCompare(String(b.n)); });
+  var rows = lbRanked(JN.tab === 'all' ? '' : st.cls);
   if (!rows.length) { boardBox.append(h('p',{class:'small muted'}, vi ? 'Chưa có ai. Hãy là người đầu tiên!' : 'Nobody yet. Be the first!')); return; }
-  var rank = 0, last = null;
-  rows.forEach(function(r, i){ if (r.pts !== last) { rank = i + 1; last = r.pts; } r.rank = rank; });
   var mine = rows.find(function(r){ return (String(r.n) + '|' + String(r.c || '')).toLowerCase() === me; });
   var show = rows.slice(0, 10);
-  function row(r){
-    var isMe = mine && r === mine;
-    return h('li',{class:'lb-row' + (isMe ? ' me' : '') + (r.rank <= 3 ? ' top' + r.rank : '')},
-      h('span',{class:'lb-rank'}, r.rank === 1 ? '🥇' : r.rank === 2 ? '🥈' : r.rank === 3 ? '🥉' : String(r.rank)),
-      h('img',{class:'lb-seedy', src:seedySvg(Math.min(EVO_MAX, +r.m || 0)), alt:''}),
-      h('span',{class:'lb-name'}, h('b',null, r.n), isMe ? h('span',{class:'chip live', style:'margin-left:6px'}, vi ? 'Em' : 'You') : null, h('span',{class:'small muted lb-cls'}, (r.c ? r.c + ' · ' : '') + (+r.m || 0) + (vi ? ' nhiệm vụ' : (+r.m === 1 ? ' mission' : ' missions')))),
-      h('span',{class:'lb-pts'}, I('glow'), String(r.pts)));
-  }
+  function row(r){ return lbRow(r, {me: mine && r === mine}); }
   var ol = h('ol',{class:'lb-list'}, show.map(row));
   if (mine && show.indexOf(mine) < 0) ol.append(h('li',{class:'lb-gap', 'aria-hidden':'true'}, '⋯'), row(mine));
   boardBox.append(ol, h('p',{class:'small muted', style:'margin-top:8px'}, vi ? 'Điểm = mỗi ngôi sao 10 điểm + mỗi nhiệm vụ hoàn thành 50 điểm.' : 'Points: 10 for every star, plus 50 for every mission you finish.'));
@@ -1842,6 +1856,42 @@ function sJourney(w){
   JN.timer = setInterval(function(){ if (view.name === 'journey' && document.visibilityState === 'visible') loadBoard(true); }, 60000);
 }
 
+/* ---- the full leaderboard page: for the teacher, or for the classroom screen ---- */
+function sBoard(w){
+  var vi = LANG === 'vi';
+  w.append(topBar(true));
+  if (!JN.list) loadJourney();
+  w.append(h('div',{class:'hero3d clay', style:'margin-bottom:18px'},
+    h('div',{class:'hero-txt'}, h('div',{class:'eyebrow'}, vi ? 'Hành trình khoa học' : 'Science mission journey'),
+      h('h1',{class:'t3d'}, vi ? 'Bảng xếp hạng' : 'Leaderboard'),
+      h('p',{class:'muted', style:'font-weight:700'}, vi ? 'Cập nhật mỗi khi học sinh chơi.' : 'Updates every time a student plays. Points: 10 for every star, plus 50 for every mission finished.')),
+    h('div',{class:'hero-art', 'aria-hidden':'true'}, h('img',{class:'f1', src:seedySvg(8), alt:''}), I('trophy','f2'), I('medal','f3'), I('sparkles','f4'), I('glow','f5'))));
+  var teacher = !!siteKey();
+  var classes = Array.from(new Set(((DATA.settings && DATA.settings.classes) || []).concat(((JN.board && JN.board.rows) || []).map(function(r){ return String(r.c || ''); })).filter(Boolean)))
+    .sort(function(a, b){ return a.localeCompare(b, undefined, {numeric:true}); });
+  var bar = h('div',{class:'row', style:'margin-bottom:14px'},
+    h('div',{class:'seg', role:'group', 'aria-label':'Class'}, [''].concat(classes).map(function(c){
+      return h('button',{class:(JN.bcls || '') === c ? 'on' : '', onclick:function(){ JN.bcls = c; render(); }}, c || (vi ? 'Tất cả' : 'All classes')); })),
+    h('button',{class:'btn sm primary', disabled:JN.boardLoading, onclick:function(){ loadBoard(); render(); }}, I('rotr'), JN.boardLoading ? (vi ? 'Đang tải…' : 'Loading…') : (vi ? 'Làm mới' : 'Refresh')),
+    teacher ? h('a',{class:'btn sm', href:'#results'}, I('books'), 'Class results') : null,
+    JN.board && JN.board.now ? h('span',{class:'small muted'}, 'Updated ' + fmtTime(JN.board.now)) : null);
+  w.append(bar);
+  var box = h('section',{class:'lb clay', style:'margin-top:0'}); w.append(box);
+  if (!trackUrl()) { box.append(h('p',{class:'note warn'}, 'Student tracking is not set up yet.')); return; }
+  if (!JN.board) {
+    if (JN.boardErr === 'old') box.append(h('p',{class:'note warn'}, 'Your Google script needs the new code before the leaderboard can show. In the FLIPSEED Teacher Studio, open "Mission journey" and follow "Update your Google script (once)".'));
+    else if (JN.boardErr) box.append(h('p',{class:'note bad'}, 'Could not reach your Google Sheet. Press Refresh to try again.'));
+    else { box.append(h('div',{class:'progress'}, h('div',{class:'spin'}), 'Loading…')); if (!JN.boardLoading) loadBoard(); }
+    return;
+  }
+  var rows = lbRanked(JN.bcls || '');
+  if (!rows.length) { box.append(h('p',{class:'small muted'}, vi ? 'Chưa có ai trên bảng xếp hạng.' : 'Nobody on the leaderboard yet.')); return; }
+  box.append(h('ol',{class:'lb-list'}, rows.slice(0, 100).map(function(r){ return lbRow(r, {del:teacher}); })));
+  if (teacher) box.append(h('p',{class:'small muted', style:'margin-top:8px'}, 'Only you see the 🗑 buttons, because this device has your teacher key. Deleting removes all of that student\'s results.'));
+  clearInterval(JN.timer);
+  JN.timer = setInterval(function(){ if (view.name === 'board' && document.visibilityState === 'visible') loadBoard(true); }, 30000);
+}
+
 /* ---- teacher: choose the missions and their order ---- */
 function journeyPanel(){
   var j = JSON.parse(JSON.stringify(journeyCfg()));
@@ -1880,7 +1930,8 @@ function journeyPanel(){
     h('p',{class:'small muted'}, 'Students see all open missions on one map, in this order. They finish one mission to unlock the next, and Seedy grows with every mission. Tick "Open for students" to add a mission to the map. Each grade has its own journey: a student in 3G1 sees the Grade 3 missions.'),
     h('div',{class:'field'}, h('label',null, 'One link for all students: the mission map'),
       h('div',{class:'copyline'}, linkIn, link ? h('button',{class:'btn sm primary', onclick:function(){ copyText(link, linkIn, 'Mission map link copied'); }}, I('link'), 'Copy') : null,
-        h('button',{class:'btn sm', onclick:function(){ JN.list = null; go({name:'journey'}); }}, I('eyes'), 'Preview the map'))),
+        h('button',{class:'btn sm', onclick:function(){ JN.list = null; go({name:'journey'}); }}, I('eyes'), 'Preview the map'),
+        link ? h('a',{class:'btn sm sun', href:link + '#leaderboard', target:'_blank', rel:'noopener'}, I('trophy'), 'Open the leaderboard') : null)),
     body, h('div',{class:'row'}, saveBtn));
   if (trackUrl()) {
     var gsBox = h('textarea',{class:'inp', readOnly:true, style:'min-height:120px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.75rem', 'aria-label':'New Google script code'});
@@ -3640,6 +3691,7 @@ function routeFromHash(){
   var c = (location.hash||'').replace('#','');
   if (c === 'results') return {name:'results'};
   if (c === 'journey' || c === 'map') return {name:'journey'};
+  if (c === 'leaderboard' || c === 'board') return {name:'board'};
   var a = c && findByCode(c);
   if (!a && c && /^[a-z0-9]{3,6}$/i.test(c)) return {name:'home', missing:c};
   return a ? {name:'hub', id:a.id} : null;
