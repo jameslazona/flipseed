@@ -50,4 +50,6 @@ if '<meta charset' not in html[:600].lower():
             '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">'
             '<style>body{margin:0}[hidden]{display:none!important}</style></head><body>\n') + html + '\n</body></html>'
 open(out, 'w', encoding='utf-8').write(html)
+bm = re.search(r"var BUILD = '([^']*)'", html)
+open(os.path.join(os.path.dirname(os.path.abspath(out)), 'version.json'), 'w', encoding='utf-8').write(json.dumps({'build': bm.group(1) if bm else ''}, ensure_ascii=False))
 print('activities:', sorted(keep), '| page bytes:', len(html.encode()))
